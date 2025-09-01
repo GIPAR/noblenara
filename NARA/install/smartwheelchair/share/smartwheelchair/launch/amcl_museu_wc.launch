@@ -1,0 +1,32 @@
+<launch>
+    <!-- MAP TO ODOM use when no gmapping -->
+<!--    <node pkg="tf" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 map odom 100" />-->
+
+    <!-- Run Map Server for AMCL-->
+    <node name="amcl_map_server" pkg="map_server" type="map_server"
+          args="$(find b400wheelchair_description)/maps/museu.yaml">
+        <remap from="/map" to="/amcl_map"/>
+    </node>
+
+    <!--- Run AMCL --> 
+    <node name="amcl" pkg="amcl" type="amcl">
+        <remap from="/scan" to="/scan" />
+        <remap from="/map" to="/amcl_map"/>
+
+        <param name="max_particles" value="100" />
+        <param name="min_particles" value="50" />
+        <param name="base_frame_id" value="robot_footprint" />
+<!--        <param name="odom_frame_id" value="/odom" />-->
+        <param name="odom_model_type" value="omni" />
+        <param name="initial_pose_x" value="0" />
+        <param name="initial_pose_y" value="0" />
+    <!--    <param name="initial_pose_a" value="0.4890" />-->
+  </node>
+
+  <!--- Run Move Base -->
+ <include file="$(find b400wheelchair_description)/launch/move_base_museu_wc.launch" />
+
+
+  <node pkg="rviz" type="rviz" name="wc_rviz" args="-d $(find b400wheelchair_description)/rviz/navigation_wc.rviz"/>
+
+</launch>
