@@ -1,0 +1,4 @@
+source;share/smartwheelchair/local_setup.bash
+source;share/smartwheelchair/local_setup.dsv
+source;share/smartwheelchair/local_setup.sh
+source;share/smartwheelchair/local_setup.zsh
