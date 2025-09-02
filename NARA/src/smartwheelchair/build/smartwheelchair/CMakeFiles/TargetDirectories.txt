@@ -1,9 +1,0 @@
-/home/noblenara/NARA/src/smartwheelchair/build/smartwheelchair/CMakeFiles/uninstall.dir
-/home/noblenara/NARA/src/smartwheelchair/build/smartwheelchair/CMakeFiles/smartwheelchair_uninstall.dir
-/home/noblenara/NARA/src/smartwheelchair/build/smartwheelchair/CMakeFiles/test.dir
-/home/noblenara/NARA/src/smartwheelchair/build/smartwheelchair/CMakeFiles/edit_cache.dir
-/home/noblenara/NARA/src/smartwheelchair/build/smartwheelchair/CMakeFiles/rebuild_cache.dir
-/home/noblenara/NARA/src/smartwheelchair/build/smartwheelchair/CMakeFiles/list_install_components.dir
-/home/noblenara/NARA/src/smartwheelchair/build/smartwheelchair/CMakeFiles/install.dir
-/home/noblenara/NARA/src/smartwheelchair/build/smartwheelchair/CMakeFiles/install/local.dir
-/home/noblenara/NARA/src/smartwheelchair/build/smartwheelchair/CMakeFiles/install/strip.dir
