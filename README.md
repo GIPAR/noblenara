@@ -20,7 +20,6 @@ Para a instalação do ROS2 Jazzy, segue-se o tutorial encontrado no seguinte li
 bash
 $ sudo apt install ros-jazzy-nav2-map-server
 $ sudo apt install ros-jazzy-ros-gz
-$ sudo apt install gz-harmonic
 $ sudo apt install ros-jazzy-ros-gz-sim ros-jazzy-ros-gz-bridge
 $ sudo apt-get install ros-jazzy-robot-state-publisher
 $ sudo apt install ros-jazzy-gz-ros2-control>
