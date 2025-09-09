@@ -18,6 +18,7 @@ Para a instalação do ROS2 Jazzy, segue-se o tutorial encontrado no seguinte li
 
 ```
 bash
+$ sudo apt install python3-colcon-*
 $ sudo apt install ros-jazzy-nav2-map-server
 $ sudo apt install ros-jazzy-ros-gz
 $ sudo apt install ros-jazzy-ros-gz-sim ros-jazzy-ros-gz-bridge
@@ -25,6 +26,31 @@ $ sudo apt-get install ros-jazzy-robot-state-publisher
 $ sudo apt install ros-jazzy-gz-ros2-control
 ```
 
+### 1.2 - Set - Preparando o Workspace
+
+Navegue até a pasta da NARA, o diretório padrão utilizado será /home/"nome-de-usuário"/NARA
+
+```
+bash
+$ colcon build
+```
+
+No terminal abra o seguinte arquivo depois de compilar com sucesso o Projeto
+
+```
+bash
+$ gnome-text-editor ~/.bashrc
+```
+
+Adicione estas duas linhas de código no final deste arquivo
+
+```
+source /opt/ros/jazzy/setup.bash
+source /home/noblegipar/NARA/install/setup.bash 
+```
+
+Estes comandos permitirão que o projeto e o próprio ROS sejam "encontrados" pelo sistema
+Obs: **Troque "noblegipar" pelo nome de usuário do seu computador**
 
 ## 2 - Simulação
 
