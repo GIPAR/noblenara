@@ -55,24 +55,31 @@ def generate_launch_description():
             '/noblenara/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
 
             # Bridge Gazebo's /noblenara/odom to ROS 2's /noblenara/odom
-            '/noblenara/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
+            '/noblenara/odom@nav_msgs/msg/Odometry@gz.msgs.Odometry',
             
             # Bridge Lidar Scan (Gazebo -> ROS2)
             '/noblenara/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan',
         
             # Clock bridge
-            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
+            '/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock',
             
-            # Câmera Navegação: RGB color image | Câmera Principal de Navegação
-            '/noblenara/camera_link@sensor_msgs/msg/Image@gz.msgs.Image',
-            # 3D point cloud data
+            # ZED 2i Camera (RGB-D): RGB image
+            '/noblenara/camera_link/image@sensor_msgs/msg/Image@gz.msgs.Image',
+            
+            # ZED 2i Camera (RGB-D): Depth image
+            '/noblenara/camera_link/depth_image@sensor_msgs/msg/Image@gz.msgs.Image',
+            
+            # ZED 2i Camera (RGB-D): 3D point cloud data
             '/noblenara/camera_link/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked', #PointCLoudPacked é a versão comprimida
         
             # Câmera de Usuário: RGB image only | Câmera da Interface/Que aponta pro usuário da cadeira sentado
             '/noblenara/camera_user@sensor_msgs/msg/Image@gz.msgs.Image', 
             
-            #Parâmetros das Câmeras | Os parâmetros de ambas as câmeras estão aqui, talvez seja necessário dividi-las no futuro, da mesma forma que está no ROS1
-            '/noblenara/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo'
+            #Parâmetros das Câmeras | Parâmetros da Câmera do usuário, caso tivesse mais de uma câmera com o msm plugin todas as info ficariam neste mesmo tópico (10/09)
+            '/noblenara/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo',
+            
+            #Parâmetros da Câmera ZED | Camera Navegação/Link
+            '/noblenara/camera_link/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo'
           ],
         output='screen'
 )
