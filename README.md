@@ -57,7 +57,7 @@ Obs: **Troque "noblegipar" pelo nome de usuário do seu computador**
 ### Abrindo o Mundo com a Cadeira
 ```
 bash
-$ ros2 launch smartwheelchair worldmuseum.launch
+$ ros2 launch smartwheelchair worldmuseum.launch.py
 # Em outro terminal:
-$ ros2 launch smartwheelchair chairlaunch.launch
+$ ros2 launch smartwheelchair chair.launch.py
 ```
