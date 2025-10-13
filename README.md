@@ -28,7 +28,7 @@ $ sudo apt install ros-jazzy-gz-ros2-control
 
 ### 1.2 - Set - Preparando o Workspace
 
-Navegue até a pasta da NARA, o diretório padrão utilizado será /home/"nome-de-usuário"/NARA
+***Abra um novo terminal*** e navegue até a pasta da NARA, o diretório padrão utilizado será /home/"nome-de-usuário"/NARA
 
 ```
 bash
