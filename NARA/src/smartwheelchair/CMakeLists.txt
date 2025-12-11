@@ -34,9 +34,9 @@ install(DIRECTORY
 
 #NOTA: ADICIONAR QUANDO FOR NECESSÁRIO
 # Instalar scripts Python
-#install(PROGRAMS
-#  scripts/meu_script.py
-#  DESTINATION lib/${PROJECT_NAME})
+install(PROGRAMS
+  scripts/teleop_keyboard.py
+  DESTINATION lib/${PROJECT_NAME})
 # Instalar módulos Python
 #ament_python_install_package(${PROJECT_NAME})
 #NOTA: ADICIONAR QUANDO FOR NECESSÁRIO
