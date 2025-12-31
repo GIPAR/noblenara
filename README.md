@@ -4,10 +4,11 @@ Projeto em desenvolvimento que busca migrar, criar e unificar tecnologias da cad
 ```
 1 - O projeto ainda está na fase inicial de desenvolvimento, severas atualizações são esperadas ao longo deste tempo.
 2 - É usado como base inicial os arquivos presentes no repositório b400wheelchair_ws do ramo att_06/2025
-3 - Incluiu-se também neste repositório um tutorial para o uso do container da NARA no ROS1
+3 - Incluiu-se também, na pasta "nara-sim", um tutorial para o uso do container da NARA no ROS1
+4 - O projeto inclui dois subprojetos, "nara-sim" para a simulação e "nara-main" para a cadeira física
 ```
 
-## 1 - Pré-requisitos
+## 1 - Como utilizar a simulação
 É necessário instalar bibliotecas e diferentes dependências para o correto funcionamento das simulações e pacotes, sendo que o projeto está sendo testado e construido no seguinte sistema:
 * Ubuntu 24.04
 * ROS2 Jazzy
@@ -28,28 +29,20 @@ $ sudo apt install ros-jazzy-gz-ros2-control
 
 ### 1.2 - Set - Preparando o Workspace
 
-***Abra um novo terminal*** e navegue até a pasta da NARA, o diretório padrão utilizado será /home/"nome-de-usuário"/NARA
+Com s arquivos baixados deste github, mova a pasta "nara-sim" para o diretório padrão do seu computador, navegue até ela com ***um novo terminal*** e rode o seguinte comando:
 
 ```
 bash
 $ colcon build
 ```
 
-No terminal abra o seguinte arquivo depois de compilar com sucesso o Projeto
+Agora devemos permitir que nosso pacote seja encontrado pelo sistema, juntamente com o ROS. Para isso, rode os seguintes comandos e abra um novo terminal novamente:
 
 ```
-bash
-$ gnome-text-editor ~/.bashrc
+echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+echo "source /home/noblegipar/nara-sim/install/setup.bash" >> ~/.bashrc
 ```
 
-Adicione estas duas linhas de código no final deste arquivo
-
-```
-source /opt/ros/jazzy/setup.bash
-source /home/noblegipar/NARA/install/setup.bash 
-```
-
-Estes comandos permitirão que o projeto e o próprio ROS sejam "encontrados" pelo sistema
 Obs: **Troque "noblegipar" pelo nome de usuário do seu computador**
 
 ## 2 - Simulação
