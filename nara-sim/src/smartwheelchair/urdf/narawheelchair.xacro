@@ -1,9 +1,8 @@
 <?xml version="1.0" ?>
-<robot name="b400wheelchair" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="NARA" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 <xacro:include filename="$(find smartwheelchair)/urdf/materials.xacro" />
-<xacro:include filename="$(find smartwheelchair)/urdf/b400wheelchair.trans" />
-<xacro:include filename="$(find smartwheelchair)/urdf/b400wheelchair.gazebo" />
+<xacro:include filename="$(find smartwheelchair)/urdf/narawheelchair.gazebo" />
 
 <link name="robot_footprint"></link>
 
@@ -190,42 +189,42 @@
   <child link="hokuyo_link"/>
 </joint>
 
-<joint name="Rev61" type="continuous">
+<joint name="left_wheel_joint" type="continuous">
   <origin rpy="0 0 0" xyz="-0.25395 0.25952 0.1778"/>
   <parent link="base_link"/>
   <child link="LeftBwheel_1"/>
   <axis xyz="0.0 1.0 0.0"/>
 </joint>
 
-<joint name="Rev62" type="continuous">
+<joint name="right_wheel_joint" type="continuous">
   <origin rpy="0 0 0" xyz="-0.25395 -0.25952 0.1778"/>
   <parent link="base_link"/>
   <child link="RightBwheel_1"/>
-  <axis xyz="-0.0 -1.0 0.0"/>
+  <axis xyz="0.0 1.0 0.0"/>
 </joint>
 
-<joint name="Rev63" type="continuous">
+<joint name="right_caster_joint" type="continuous">
   <origin rpy="0 0 0" xyz="-0.0426 0.04064 -0.1457"/>
   <parent link="RightCaster_1"/>
   <child link="RightFwheel_1"/>
-  <axis xyz="-0.0 -1.0 -0.0"/>
+  <axis xyz="0.0 1.0 0.0"/>
 </joint>
 
-<joint name="Rev64" type="continuous">
+<joint name="left_caster_joint" type="continuous">
   <origin rpy="0 0 0" xyz="-0.0426 -0.04064 -0.1457"/>
   <parent link="LeftCaster_1"/>
   <child link="LeftFwheel_1"/>
-  <axis xyz="0.0 1.0 -0.0"/>
+  <axis xyz="0.0 1.0 0.0"/>
 </joint>
 
-<joint name="Rev65" type="continuous">
+<joint name="right_angular_joint" type="continuous">
   <origin rpy="0 0 0" xyz="0.296874 -0.179919 0.26"/>
   <parent link="base_link"/>
   <child link="RightCaster_1"/>
-  <axis xyz="0.0 0.0 -1.0"/>
+  <axis xyz="0.0 0.0 1.0"/>
 </joint>
 
-<joint name="Rev66" type="continuous">
+<joint name="left_angular_joint" type="continuous">
   <origin rpy="0 0 0" xyz="0.296874 0.185219 0.26"/>
   <parent link="base_link"/>
   <child link="LeftCaster_1"/>

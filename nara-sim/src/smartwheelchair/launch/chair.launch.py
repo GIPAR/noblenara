@@ -17,7 +17,7 @@ def generate_launch_description():
     )
     
     # Path to XACRO file
-    xacro_file = os.path.join(pkg_share, 'urdf', 'b400wheelchair.xacro')
+    xacro_file = os.path.join(pkg_share, 'urdf', 'narawheelchair.xacro')
     
     # Process XACRO file
     robot_description_command = Command(['xacro ', xacro_file])
