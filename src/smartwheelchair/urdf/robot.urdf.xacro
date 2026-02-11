@@ -1,0 +1,196 @@
+<?xml version="1.0"?>
+<robot name="smartwheelchair" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <material name="silver"><color rgba="0.75 0.75 0.75 1"/></material>
+  <material name="black"><color rgba="0 0 0 1"/></material>
+  <material name="blue"><color rgba="0 0 0.8 1"/></material>
+
+  <link name="base_footprint"/>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://smartwheelchair/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://smartwheelchair/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="40.0"/>
+      <inertia ixx="0.5" ixy="0" ixz="0" iyy="0.5" iyz="0" izz="0.5"/>
+    </inertial>
+  </link>
+
+  <link name="left_wheel">
+    <visual>
+      <geometry><cylinder length="0.05" radius="0.17"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.05" radius="0.17"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="2.0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+  </link>
+
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel"/>
+    <origin xyz="-0.25395 0.25952 0.1778" rpy="1.5707 0 0"/>
+    <axis xyz="0 0 -1"/> </joint>
+
+
+  <link name="right_wheel">
+    <visual>
+      <geometry><cylinder length="0.05" radius="0.17"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.05" radius="0.17"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="2.0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+  </link>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel"/>
+    <origin xyz="-0.25395 -0.25952 0.1778" rpy="1.5707 0 0"/>
+    <axis xyz="0 0 -1"/>
+  </joint>
+
+  <link name="caster_left">
+    <visual>
+       <geometry><sphere radius="0.08"/></geometry>
+       <material name="black"/>
+    </visual>
+    <collision>
+      <geometry><sphere radius="0.08"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="caster_left_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="caster_left"/>
+    <origin xyz="0.15 0.15 0.08" rpy="0 0 0"/>
+  </joint>
+  
+  <gazebo reference="caster_left">
+    <mu1>0.001</mu1><mu2>0.001</mu2>
+  </gazebo>
+
+  <link name="caster_right">
+    <visual>
+       <geometry><sphere radius="0.08"/></geometry>
+       <material name="black"/>
+    </visual>
+    <collision>
+      <geometry><sphere radius="0.08"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="caster_right_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="caster_right"/>
+    <origin xyz="0.15 -0.15 0.08" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="caster_right">
+    <mu1>0.001</mu1><mu2>0.001</mu2>
+  </gazebo>
+
+  <link name="hokuyo_link">
+    <visual>
+      <geometry><cylinder length="0.05" radius="0.03"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.05" radius="0.03"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="hokuyo_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="hokuyo_link"/>
+    <origin xyz="0.58 0 0.04" rpy="3.14159 0 0"/>
+  </joint>
+
+  <gazebo reference="hokuyo_link">
+    <sensor name='gpu_lidar' type='gpu_lidar'>
+        <pose relative_to='hokuyo_link'>0 0 0 0 0 0</pose>
+        <topic>scan</topic>
+        <frame_id>hokuyo_link</frame_id>
+        <ignition_frame_id>hokuyo_link</ignition_frame_id>
+        
+        <update_rate>10</update_rate>
+        <lidar>
+            <scan>
+                <horizontal>
+                    <samples>640</samples>
+                    <resolution>1</resolution>
+                    <min_angle>-3.14</min_angle>
+                    <max_angle>3.14</max_angle>
+                </horizontal>
+                <vertical>
+                    <samples>1</samples>
+                    <resolution>0.01</resolution>
+                    <min_angle>0</min_angle>
+                    <max_angle>0</max_angle>
+                </vertical>
+            </scan>
+            <range>
+                <min>0.3</min>
+                <max>10.0</max>
+                <resolution>0.01</resolution>
+            </range>
+        </lidar>
+        <always_on>1</always_on>
+        <visualize>true</visualize>
+    </sensor>
+  </gazebo>
+
+  <gazebo>
+    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+      <wheel_separation>0.52</wheel_separation>
+      <wheel_radius>0.17</wheel_radius>
+      <max_linear_acceleration>1</max_linear_acceleration>
+      <topic>cmd_vel</topic>
+      <odom_topic>odom</odom_topic>
+      <tf_topic>tf</tf_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_footprint</child_frame_id>
+    </plugin>
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+  </gazebo>
+</robot>

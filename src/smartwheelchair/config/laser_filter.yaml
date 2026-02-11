@@ -1,0 +1,14 @@
+scan_to_scan_filter_chain:
+  ros__parameters:
+    filter1:
+      name: footprint_filter
+      type: laser_filters/LaserScanBoxFilter
+      params:
+        box_frame: base_link
+        min_x: -0.6
+        max_x: 0.55  # Um pouco antes do LiDAR para não cegar a frente
+        min_y: -0.35 # Largura da cadeira (esq)
+        max_y: 0.35  # Largura da cadeira (dir)
+        min_z: -0.1
+        max_z: 1.0
+        invert: false # False = remove o que está DENTRO da caixa
