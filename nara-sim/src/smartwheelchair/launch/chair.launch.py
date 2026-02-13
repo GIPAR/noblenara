@@ -26,7 +26,9 @@ def generate_launch_description():
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        parameters=[{'robot_description': robot_description_command}],
+        parameters=[
+            {'robot_description': robot_description_command},
+            {'use_sim_time': True}],
         output='screen'
     )
     
@@ -62,6 +64,12 @@ def generate_launch_description():
         
             # Clock bridge
             '/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock',
+
+            # tf bridge
+            '/tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
+
+            # Joint States bridge
+            '/world/default/model/wheelchair/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model',
             
             # ZED 2i Camera (RGB-D): RGB image
             '/noblenara/camera_link/image@sensor_msgs/msg/Image@gz.msgs.Image',
@@ -81,6 +89,9 @@ def generate_launch_description():
             #Parâmetros da Câmera ZED | Camera Navegação/Link
             '/noblenara/camera_link/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo'
           ],
+        remappings=[
+            ('/world/default/model/wheelchair/joint_state', '/joint_states'),
+        ],
         output='screen'
 )
     
