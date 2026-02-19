@@ -76,8 +76,3 @@ docker run --runtime nvidia -it --privileged --network=host --ipc=host --pid=hos
 
 - Feito código básico para ESP32; Encoder, IMU, Ponte H + Controle Básico de Velocidade (falta tunar)
 - Solucionado problema de tensão esperada no Encoder (In: Jetson 5V --- Out: DDT Temporário)
-
-#### ROS1 Code
-
-Motor control loop (20Hz): Reads encoder RPM, calculates PID output, sends PWM to motors
-Safety watchdog: Stops motors if no cmd_vel received for 400ms

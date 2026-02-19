@@ -51,7 +51,7 @@
 #define MOTOR_RIGHT_RPWM 14
 
 #define K_P 30.0  // P constant
-#define K_I 3.0   // I constant
+#define K_I 0.0   // I constant
 #define K_D 0.3   // D constant
 
 //=============================================================================

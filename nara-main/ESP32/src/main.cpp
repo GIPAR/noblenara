@@ -86,11 +86,18 @@ QuickPID pidRight(&input_right, &output_right, &setpoint_right,
 void callback_watchdog();
 void callback_encoder();
 
+void chat_publisher(const char* message, int number){
+  char chat_buf[64];
+  snprintf(chat_buf, sizeof(chat_buf), message, number);
+  chat_msg.data.data = chat_buf;
+  chat_msg.data.size = strlen(chat_buf);
+  chat_msg.data.capacity = sizeof(chat_buf);
+  rcl_publish(&chat_pub, &chat_msg, NULL);
+}
+
 //Funções Callbacks que são chamados pelo executor do ROS no loop
 void callback_cmd_vel(const void * msgin){
-  //Terminar: Combined (PID + Velocity Profiling):
-  //This is actually a really good combo for a wheelchair - smooth acceleration prevents jerky motion and passenger discomfort.
-  //Implementação Inicial: PID Only -> Depois adicionar Velocity Profiling e Watchdog Stop
+  //Possivelmente no futuro: Combinar (PID + Velocity Profiling):
   watchdog_cmdvel = millis();
 
   geometry_msgs__msg__Twist * msg = (geometry_msgs__msg__Twist *) msgin;
@@ -178,7 +185,14 @@ void callback_watchdog(rcl_timer_t * timer, int64_t last_call_time){
   if (timer == NULL) return;
 
   if (millis() - watchdog_cmdvel >= CMD_TIMEOUT_MS){
-    //put here to stop motors || verificar se o tempo posto está ok (provavelmente n)
+    targetleftVel = 0.0;
+    targetrightVel = 0.0;
+    pidLeft.Reset();
+    pidRight.Reset();
+    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A);
+    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B);
+    mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A);
+    mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B);
   };
 
   callback_encoder();
@@ -186,7 +200,15 @@ void callback_watchdog(rcl_timer_t * timer, int64_t last_call_time){
   encoderLeft.clearCount();
   encoderRight.clearCount();
   callback_motorcontrol();
-  rcl_publish(&encoder_pub, &encoder_msg, NULL);
+  rcl_ret_t ret = rcl_publish(&encoder_pub, &encoder_msg, NULL);
+  if (ret != RCL_RET_OK) {
+    chat_publisher("Falha na publicação da odometria!; Código ", ret);
+
+    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A);
+    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B);
+    mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A);
+    mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B);
+  }
 }
 
 void setup() {
@@ -254,7 +276,7 @@ void setup() {
     CMD_VEL_TOPIC);
 
   // Configurar timer e executor || RCL_MS_TO_NS(20) para mudar a frequencia -- 20 = 50Hz
-  rclc_timer_init_default(&timer_watchdog, &support, RCL_MS_TO_NS(WATCHDOG_PUBLISH_RATE), callback_watchdog);
+  rclc_timer_init_default2(&timer_watchdog, &support, RCL_MS_TO_NS(WATCHDOG_PUBLISH_RATE), callback_watchdog, true);
   rclc_executor_init(&executor, &support.context, 2, &allocator);
   rclc_executor_add_timer(&executor, &timer_watchdog);
   rclc_executor_add_subscription(&executor, &cmd_vel_sub, &cmd_vel_msg, &callback_cmd_vel, ON_NEW_DATA);
