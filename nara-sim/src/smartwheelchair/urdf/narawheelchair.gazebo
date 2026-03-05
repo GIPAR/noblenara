@@ -156,6 +156,7 @@
  <!-- Updated Hokuyo Link ROS2 -->
  <gazebo reference="hokuyo_link">
     <sensor type="gpu_lidar" name="head_hokuyo_sensor">
+      <gz_frame_id>hokuyo_link</gz_frame_id>
       <pose>0 0 0 0 0 0</pose>
       <topic>/noblenara/scan</topic>
       <update_rate>40</update_rate>
