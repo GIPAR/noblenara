@@ -44,8 +44,8 @@
 #define PWM_MAX 100
 #define PWM_MIN -PWM_MAX
 
-#define MOTOR_LEFT_LPWM 19
-#define MOTOR_LEFT_RPWM 18
+#define MOTOR_LEFT_LPWM 26
+#define MOTOR_LEFT_RPWM 25
 #define MOTOR_EN 23 //Com todos os quatro enable juntos
 #define MOTOR_RIGHT_LPWM 27
 #define MOTOR_RIGHT_RPWM 14
