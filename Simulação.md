@@ -19,16 +19,18 @@ Para a instalação do ROS2 Jazzy, segue-se o tutorial encontrado no seguinte li
 ```
 bash
 $ sudo apt install python3-colcon-*
-$ sudo apt install ros-jazzy-nav2-map-server
 $ sudo apt install ros-jazzy-ros-gz
 $ sudo apt install ros-jazzy-ros-gz-sim ros-jazzy-ros-gz-bridge
 $ sudo apt-get install ros-jazzy-robot-state-publisher
 $ sudo apt install ros-jazzy-gz-ros2-control
+$ sudo apt install ros-jazzy-laser-filters
+$ sudo apt install ros-jazzy-slam-toolbox
+$ sudo apt install ros-jazzy-nav2-map-server
 ```
 
 ### 1.2 - Set - Preparando o Workspace
 
-Com s arquivos baixados deste github, mova a pasta "nara-sim" para o diretório padrão do seu computador, navegue até ela com ***um novo terminal*** e rode o seguinte comando:
+Com os arquivos baixados deste github, mova a pasta "nara-sim" para o diretório padrão do seu computador, navegue até ela com ***um novo terminal*** e rode o seguinte comando:
 
 ```
 bash
@@ -47,9 +49,33 @@ Obs: **Troque "noblegipar" pelo nome de usuário do seu computador**
 ## 2 - Simulação
 
 ### Abrindo o Mundo com a Cadeira
+
 ```
 bash
 $ ros2 launch smartwheelchair worldmuseum.launch.py
 # Em outro terminal:
 $ ros2 launch smartwheelchair chair.launch.py
+```
+
+### Inicializando o Slam
+
+Para inicializar o slam, simplesmente rode o comando: 
+
+```
+bash
+$ ros2 launch smartwheelchair slam.launch.py
+```
+
+Podemos vizualisar o mapa que está sendo gerado pelo rviz2, que pode ser aberto em outro terminal
+
+```
+bash
+$ ros2 run rviz2 rviz2
+```
+
+Por fim, o mapa pode ser salvo diretamente pelo slam_toolbox
+
+```
+bash
+$ ros2 service call /slam_toolbox/save_map slam_toolbox/srv/SaveMap "name: {data: 'my_map'}"
 ```

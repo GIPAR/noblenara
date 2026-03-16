@@ -16,11 +16,21 @@ def generate_launch_description():
         value=pkg_share
     )
     
-    # Path to XACRO file
+    # XACRO file setup
     xacro_file = os.path.join(pkg_share, 'urdf', 'narawheelchair.xacro')
-    
-    # Process XACRO file
     robot_description_command = Command(['xacro ', xacro_file])
+    
+    # Laser Filter Setup
+    filter_config = os.path.join(pkg_share, 'config', 'laser_filter.yaml')
+    
+    laser_filter_node = Node(
+        package='laser_filters',
+        executable='scan_to_scan_filter_chain',
+        parameters=[filter_config],
+        remappings=[ ('scan', '/noblenara/scan'), ('scan_filtered', '/noblenara/scan_filtered') 
+        ],
+        output='screen'
+    )
     
     # Robot state publisher
     robot_state_publisher_node = Node(
@@ -45,10 +55,8 @@ def generate_launch_description():
     )
     
     
-    # 3. ROS_GZ_BRIDGE NODE
-    # ==================================
-    # This is the new part. It connects Gazebo topics to ROS 2 topics.
-    # Tenha certeza que os links estão os mesmos que o .gazebo
+    # ROS_GZ_BRIDGE NODE : Faz a ponte entre os tópicos do gazebo e do ROS2
+    # O Gazebo que lida com os tópicos, diferentemente do ROS1, a ponte é necessária
     bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
@@ -93,11 +101,12 @@ def generate_launch_description():
             ('/world/default/model/wheelchair/joint_state', '/joint_states'),
         ],
         output='screen'
-)
+    )
     
     return LaunchDescription([
         gazebo_resource_path,
         robot_state_publisher_node,
         spawn_entity,
-        bridge #for the ros2 bridge of topics from Gazebo
+        bridge,
+        laser_filter_node
     ])
