@@ -1,4 +1,4 @@
-# NOBLE NARA SIMULATOR
+# NOBLENARA SIM
 Tutorial de como utilizar a cadeira de rodas autônoma no projeto "noblenara", que é focado no desenvolvimento e migração de pacotes para uma versão atualizada e eficiente em um ambiente de simulação conhecido como "gazebo"
 
 ```
@@ -30,25 +30,33 @@ $ sudo apt install ros-jazzy-nav2-map-server
 
 ### 1.2 - Set - Preparando o Workspace
 
-Com os arquivos baixados deste github, mova a pasta "nara-sim" para o diretório padrão do seu computador, navegue até ela com ***um novo terminal*** e rode o seguinte comando:
+Com os arquivos baixados deste github, mova a pasta "noblenara-main" para o diretório padrão do seu computador, e em ***um novo terminal*** use os seguintes comandos para compilar a simulação:
 
 ```
 bash
-$ colcon build
+$ cd ~/noblenara-main/nara-sim
+$ colcon build --symlink-install
 ```
 
-Agora devemos permitir que nosso pacote seja encontrado pelo sistema, juntamente com o ROS. Para isso, rode os seguintes comandos e abra um novo terminal novamente:
+Agora devemos permitir que nosso pacote seja encontrado pelo sistema, juntamente com o ROS. Para isso, rode os seguintes comandos:
 
 ```
-echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
-echo "source /home/noblegipar/nara-sim/install/setup.bash" >> ~/.bashrc
+bash
+$ echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+$ echo "source ~/noblenara-main/nara-sim/install/setup.bash" >> ~/.bashrc
+# Comandos opcionais
+$ echo "export ROS_DOMAIN_ID=0" >> ~/.bashrc
+$ echo "echo "Terminal Ativado no Domínio do ROS: '"${ROS_DOMAIN_ID}"'"" >> ~/.bashrc
+$ echo "echo "Caso queira modificá-lo, modifique o comando no arquivo .bashrc"" >> ~/.bashrc
 ```
 
-Obs: **Troque "noblegipar" pelo nome de usuário do seu computador**
+Obs: O .bashrc é um arquivo que roda toda vez que um novo terminal é aberto, por isso, os próximos comandos só funcionarão se um ***outro terminal*** ser aberto novamente
 
 ## 2 - Simulação
 
 ### Abrindo o Mundo com a Cadeira
+
+Estes são os comandos básicos para rodar a simulação via terminal
 
 ```
 bash

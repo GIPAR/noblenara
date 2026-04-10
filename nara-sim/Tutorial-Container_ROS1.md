@@ -73,7 +73,3 @@ $ docker exec -it nara_noetic bash
 o nome do container será dado pela seguinte linha de comando do docker run modificável:
 --name nara_noetic
 Se apagar essa linha o container terá um nome aleatório que pode ser verificado com o comando $ docker ps -a.
-
-
-
-
