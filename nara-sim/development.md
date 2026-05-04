@@ -1,49 +1,26 @@
-# SLAM Commit 05/03/2026
+# Navegação Autônoma - Development Notes
 
-1 - Adicionado os dois config files da simulação de Caio + Modificado nome do tópico em mapper params
+## Navigation Dev
 
-2 - Adicionado as linhas no chair.launch.py e modificado os comentários
+### Desenvolvimento da Navegação Autônoma
 
-``` Filter Setup ```
+1. Copiado o arquivo nav2_params do repositório de giovanne (navegacao_autonoma)
 
-    filter_config = os.path.join(pkg_share, 'config', 'laser_filter.yaml')
+2. Instalado os pacotes
+sudo apt install ros-jazzy-navigation2
+sudo apt install ros-jazzy-nav2-bringup
 
-    laser_filter_node = Node(
-        package='laser_filters',
-        executable='scan_to_scan_filter_chain',
-        parameters=[filter_config],
-        remappings=[
-            ('scan', '/noblenara/scan'),
-            ('scan_filtered', '/noblenara/scan_filtered')
-        ],
-        output='screen'
-    )
+3. Modificado nav2_params e mapper_params (trocado o test_map para "", remove uma mensagem de avizo )
 
-3 - Adicionado arquivo slam.launch.py de Caio
+4. Criado nav2_launch.py
+Necessário, usando o launch base do nav2 ele chama todos os nós possíveis
 
-4 - Pacotes Instalados
 
-    ros-jazzy-laser-filters \
-    ros-jazzy-slam-toolbox \
+### Modificado narawheelchair.xacro
 
-5 - Erro:
+<joint name="robot_footprint_joint" type="fixed"
+  <origin xyz="0.25395 0 0" rpy="0 0 0"
 
-[scan_to_scan_filter_chain-4] [WARN] [1772724221.509093578] [laser_scan_box_filter]: Could not get transform, irgnoring laser scan! Invalid frame ID "wheelchair/robot_footprint/head_hokuyo_sensor" passed to canTransform argument source_frame - frame does not exist. canTransform returned after 1.01113 timeout was 1.
+trocado a origim para que robot_footprint esteja no centro do differential_drive, em vez de estar um pouco na frente
 
-Caio utilizou um nó para fazer um remmapping do frame id
-
-Solução alternativa proposta:
-
-O laser filter pega o frame id do gazebo **diretamente**, então se mudarmos o frame id no gazebo para o esperado, ele encontrará
-
-Adicionado a linha no .gazebo:
-<gazebo reference="hokuyo_link">
-    <sensor type="gpu_lidar" name="head_hokuyo_sensor">
-      <gz_frame_id>hokuyo_link</gz_frame_id>
-
-O erro desapareceu!
-
-Uma segunda solução que poderia ser possível:
-    Em laser_filter.yaml trocar o frame id para o esperado do gazebo em
-        params:
-            box_frame: base_link
+Aparentemente, é o melhor lugar possivel para que os calculos da navegação autonoma funcionem eficientemente

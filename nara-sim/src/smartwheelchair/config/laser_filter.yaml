@@ -5,7 +5,7 @@ scan_to_scan_filter_chain:
       type: laser_filters/LaserScanBoxFilter
       params:
         box_frame: base_link
-        min_x: -0.6
+        min_x: -0.6  # Verificar essas informações seguintes!
         max_x: 0.55  # Um pouco antes do LiDAR para não cegar a frente
         min_y: -0.35 # Largura da cadeira (esq)
         max_y: 0.35  # Largura da cadeira (dir)
