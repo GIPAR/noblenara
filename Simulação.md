@@ -67,23 +67,27 @@ $ ros2 launch smartwheelchair chair.launch.py
 
 ### Inicializando o Slam
 
-Para inicializar o slam, simplesmente rode o comando: 
+Para inicializar o slam juntamente com o rviz, simplesmente rode o comando: 
 
 ```
 bash
-$ ros2 launch smartwheelchair slam.launch.py
+$ ros2 launch smartwheelchair slam_rviz.launch.py # use slam.launch.py para abrir apenas o slam
 ```
 
-Podemos vizualisar o mapa que está sendo gerado pelo rviz2, que pode ser aberto em outro terminal
-
-```
-bash
-$ ros2 run rviz2 rviz2
-```
-
-Por fim, o mapa pode ser salvo diretamente pelo slam_toolbox
+Por fim, caso queira, o mapa pode ser salvo diretamente pelo slam_toolbox
 
 ```
 bash
 $ ros2 service call /slam_toolbox/save_map slam_toolbox/srv/SaveMap "name: {data: 'my_map'}"
 ```
+
+### Inicializando a Navegação Autônoma
+
+A navegação pode ser inicilizada com o seguinte comando:
+
+```
+bash
+$ ros2 launch smartwheelchair nav2_launch.py use_sim_time:=True
+```
+
+No Rviz2, utilize "2D Goal Pose" para comandar a cadeira pela navegação autônoma

@@ -176,7 +176,7 @@
 </link>
 
 <joint name="robot_footprint_joint" type="fixed">
-  <origin xyz="0 0 0" rpy="0 0 0" />
+  <origin xyz="0.25395 0 0" rpy="0 0 0" />
   <parent link="robot_footprint"/>
   <child link="base_link" />
   <axis xyz="0.0 1.0 0.0"/>

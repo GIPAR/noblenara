@@ -1,49 +1,38 @@
-# SLAM Commit 05/03/2026
+# Navegação Autônoma - Development Notes
 
-1 - Adicionado os dois config files da simulação de Caio + Modificado nome do tópico em mapper params
+## Navigation Dev
 
-2 - Adicionado as linhas no chair.launch.py e modificado os comentários
+### nav2_params
 
-``` Filter Setup ```
+Modificações de performance e eficiencia
 
-    filter_config = os.path.join(pkg_share, 'config', 'laser_filter.yaml')
+### slam params
 
-    laser_filter_node = Node(
-        package='laser_filters',
-        executable='scan_to_scan_filter_chain',
-        parameters=[filter_config],
-        remappings=[
-            ('scan', '/noblenara/scan'),
-            ('scan_filtered', '/noblenara/scan_filtered')
-        ],
-        output='screen'
-    )
+mode: lifelong #Para possibilitar novas informações de vias externas
 
-3 - Adicionado arquivo slam.launch.py de Caio
+Correções de código
 
-4 - Pacotes Instalados
+Adicionado as linhas de processamento
+    minimum_travel_distance: 0.0 #Processa melhor o mapa não necessitando de metros percorridos para atualizar
+    minimum_travel_heading: 0.0
 
-    ros-jazzy-laser-filters \
-    ros-jazzy-slam-toolbox \
+### .gazebo
 
-5 - Erro:
+Modificado o angulo do lidar para não se limitar a 180º, como Caio adicionou o filtro do laser, automaticamente o espaço 3d da cadeira é filtrado
 
-[scan_to_scan_filter_chain-4] [WARN] [1772724221.509093578] [laser_scan_box_filter]: Could not get transform, irgnoring laser scan! Invalid frame ID "wheelchair/robot_footprint/head_hokuyo_sensor" passed to canTransform argument source_frame - frame does not exist. canTransform returned after 1.01113 timeout was 1.
+<!-- Updated Hokuyo Link ROS2 -->
+ <!-- <gazebo reference="hokuyo_link"> -->
+    ...
+        ...
+            <min_angle>-3.14</min_angle>
+            <max_angle>3.14</max_angle> 
 
-Caio utilizou um nó para fazer um remmapping do frame id
+### Laser Filters
 
-Solução alternativa proposta:
+Modificado box de filtro, antes, estava considerando um ponto lateral da carcaça como obstáculo
 
-O laser filter pega o frame id do gazebo **diretamente**, então se mudarmos o frame id no gazebo para o esperado, ele encontrará
+### nav2_launch.py
 
-Adicionado a linha no .gazebo:
-<gazebo reference="hokuyo_link">
-    <sensor type="gpu_lidar" name="head_hokuyo_sensor">
-      <gz_frame_id>hokuyo_link</gz_frame_id>
+Adicionado Remapping de tópico no behavior server, no default ele publica no /cmd_vel mas não há parametros para o yaml para trocar o tópico publicador
 
-O erro desapareceu!
-
-Uma segunda solução que poderia ser possível:
-    Em laser_filter.yaml trocar o frame id para o esperado do gazebo em
-        params:
-            box_frame: base_link
+remappings=[('/cmd_vel', '/noblenara/cmd_vel')]
