@@ -9,11 +9,16 @@
 #     global_frame_id: map
 #     scan_topic: /scan
 
+# <--- Checkar os tópicos que eles estão publicando e se inscrevendo!!!! --->
+
 # Cérebro
 bt_navigator:
   ros__parameters:
     use_sim_time: True
+    odom_topic: "/noblenara/odom"
+    #default_nav_to_pose_bt_xml
 
+    #transform_tolerance # Possivel mudança na cadeira física
 
 
 # Criadores dos mapas de custo
@@ -25,7 +30,7 @@ global_costmap:
       robot_base_frame: robot_footprint
       resolution: 0.05
       footprint: "[[-0.2, -0.3], [-0.2, 0.3], [0.85, 0.3], [0.85, -0.3]]"
-      footprint_padding: 0.01
+      footprint_padding: 0.05
 
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
 
@@ -33,9 +38,12 @@ global_costmap:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: true
 
-      obstacle_layer:
+      obstacle_layer: # Provavelmente trocar por voxel layer quando adicionar Câmera
         plugin: "nav2_costmap_2d::ObstacleLayer"
+        track_unknown_space: true
         observation_sources: scan
+        raytrace_max_range: 10.0 # Para RPLIDAR A2M12
+        obstacle_max_range: 9.0
 
         scan:
           topic: /noblenara/scan_filtered
@@ -46,7 +54,8 @@ global_costmap:
 
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        inflation_radius: 0.6
+        cost_scaling_factor: 7.0
+        inflation_radius: 1.0
 
 local_costmap:
   local_costmap:
@@ -54,18 +63,26 @@ local_costmap:
       use_sim_time: True
       global_frame: odom
       robot_base_frame: robot_footprint
-      rolling_window: true
-      width: 5
-      height: 5
+
+      width: 6
+      height: 6
       resolution: 0.05
+      rolling_window: true
+
       footprint: "[[-0.2, -0.3], [-0.2, 0.3], [0.85, 0.3], [0.85, -0.3]]"
-      footprint_padding: 0.01
+      footprint_padding: 0.05
+
+      update_frequency: 10.0
+      publish_frequency: 10.0
+
 
       plugins: ["obstacle_layer", "inflation_layer"]
 
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         observation_sources: scan
+        raytrace_max_range: 3.5 # Relativo ao tamanho do local map, verificar!
+        obstacle_max_range: 3.0
 
         scan:
           topic: /noblenara/scan_filtered
@@ -76,7 +93,8 @@ local_costmap:
 
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        inflation_radius: 0.5
+        cost_scaling_factor: 8.0
+        inflation_radius: 1.0
 
 
 # Planejador global, retorna um caminho de acordo com o global_costmap
@@ -86,26 +104,38 @@ planner_server:
 
     planner_plugins: ["GridBased"]
     GridBased:
-      plugin: "nav2_navfn_planner::NavfnPlanner" # Verficiar opções superiores
+      plugin: "nav2_smac_planner::SmacPlannerHybrid" # Navfn = Leve | Smac Planner Hibrid-A* = Potente, ideal
+      minimum_turning_radius: 0.40
+      allow_unknown: false
+      max_iterations: 500000
+      smooth_path: true
+      motion_model_for_search: "DUBIN"
 
 
 # Planejador local
+# Tunar ou analisar posteriormente os plugins e os critics
 controller_server:
   ros__parameters:
     use_sim_time: True
     controller_frequency: 20.0
+    odom_topic: "/noblenara/odom"
+    #failure_tolerance
+    #speed_limit_topic: "/noblenara/speed_limit"
+
     controller_plugins: ["FollowPath"]
     goal_checker_plugins: ["goal_checker"]
     progress_checker_plugins: ["progress_checker"]
+    
 
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
-      required_movement_radius: 0.10
-      movement_time_allowance: 20.0
+      required_movement_radius: 0.5
+      movement_time_allowance: 7.0
 
+    # Verificar a mudança ou adição de StoppedGoalChecker --- A Cadeira para muito bruscamente perto do objetivo
     goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.5       # quando estiver x metros do objetivo o marca como completado
+      xy_goal_tolerance: 0.35       # quando estiver x metros do objetivo o marca como completado
       yaw_goal_tolerance: 0.4
       stateful: true
 
@@ -114,17 +144,19 @@ controller_server:
       time_steps: 40
       model_dt: 0.05
       batch_size: 800
-      vx_max: 0.5
+      vx_max: 1.0
       vx_min: 0.0
-      wz_max: 1.0
+      wz_max: 0.8
       motion_model: "DiffDrive"
 
-      critics: ["ObstaclesCritic", "PathAlignCritic", "PathFollowCritic", "GoalCritic", "GoalAngleCritic", "PreferForwardCritic"]
+      critics: ["CostCritic", "PathAlignCritic", "PathFollowCritic", "GoalCritic", "GoalAngleCritic", "PreferForwardCritic"]
 
-      ObstaclesCritic:
-        critical_weight: 20.0
+      CostCritic:
+        enabled: true
+        cost_weight: 3.81
         consider_footprint: true
-        collision_cost: 10000.0
+        near_goal_distance: 0.6
+        inflation_layer_name: "inflation_layer" # Existe um problema ao qual o MPPI não consegue achar o inflation layer mesmo com o setup correto; Versão 1.3.11
 
       PathAlignCritic:
         cost_weight: 14.0
@@ -145,9 +177,11 @@ controller_server:
 
 
 # Comportamentos em Caso de Emergência (Robô Impossibilitado de Continuar)
+# Verificar os tópicos que ele publica e inscreve!
 behavior_server:
   ros__parameters:
     use_sim_time: True
+    robot_base_frame: "robot_footprint"
     behavior_plugins: ["spin", "backup", "drive_on_heading", "wait"]
     
     spin:
@@ -160,14 +194,27 @@ behavior_server:
       plugin: "nav2_behaviors::Wait"
 
 
+# # Suavizador de Velocidade
+# velocity_smoother:
+#   ros__parameters:
+#     smoothing_frequency: 20.0
+#     feedback: "CLOSED_LOOP"                             # Testar na física se OPEN_LOOP é melhor (Referência de Odom vs Last Published)
+#     max_velocity: [1.0, 0.0, 0.8]
+#     min_velocity: [-0.0, 0.0, -0.8]
+#     deadband_velocity: [0.0, 0.0, 0.0]                  # Velocidades Mínimas, Tunar na Cadeira Física!
+#     max_accel: [0.5, 0.0, 0.4]
+#     max_decel: [-0.25, 0.0, -0.25]
+#     odom_topic: "/noblenara/odom"
+#     stamp_smoothed_velocity_with_smoothing_time: false  # ONLY IN JAZZY
 
-# Configurar corretamente
+
+# Monitorador de Colisão
 collision_monitor:
   ros__parameters:
     use_sim_time: True
     base_frame_id: "robot_footprint"
     odom_frame_id: "odom"
-    cmd_vel_in_topic: "/noblenara/cmd_vel_smoothed"
+    cmd_vel_in_topic: "/noblenara/cmd_vel/raw"
     cmd_vel_out_topic: "/noblenara/cmd_vel"
     transform_tolerance: 0.5
     source_timeout: 2.0
@@ -182,9 +229,9 @@ collision_monitor:
 
     SlowDown:
       type: "circle"
-      radius: 1.0
+      radius: 0.6
       action_type: "slowdown"
-      slowdown_ratio: 0.5
+      slowdown_ratio: 0.8
       min_points: 4
       visualize: True
       enabled: True

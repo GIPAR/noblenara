@@ -27,7 +27,7 @@ def generate_launch_description():
         output='screen',
         parameters=[params_file],
         namespace='',
-        remappings=[('/cmd_vel', '/noblenara/cmd_vel')]
+        remappings=[('/cmd_vel', '/noblenara/cmd_vel/raw')]
     )
 
     planner_server = LifecycleNode(
@@ -54,7 +54,8 @@ def generate_launch_description():
         name='behavior_server',
         output='screen',
         namespace='',
-        parameters=[params_file]
+        parameters=[params_file],
+        remappings=[('/cmd_vel', '/noblenara/cmd_vel/raw')]
     )
 
     collision_monitor = LifecycleNode(

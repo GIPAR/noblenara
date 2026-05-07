@@ -2,25 +2,37 @@
 
 ## Navigation Dev
 
-### Desenvolvimento da Navegação Autônoma
+### nav2_params
 
-1. Copiado o arquivo nav2_params do repositório de giovanne (navegacao_autonoma)
+Modificações de performance e eficiencia
 
-2. Instalado os pacotes
-sudo apt install ros-jazzy-navigation2
-sudo apt install ros-jazzy-nav2-bringup
+### slam params
 
-3. Modificado nav2_params e mapper_params (trocado o test_map para "", remove uma mensagem de avizo )
+mode: lifelong #Para possibilitar novas informações de vias externas
 
-4. Criado nav2_launch.py
-Necessário, usando o launch base do nav2 ele chama todos os nós possíveis
+Correções de código
 
+Adicionado as linhas de processamento
+    minimum_travel_distance: 0.0 #Processa melhor o mapa não necessitando de metros percorridos para atualizar
+    minimum_travel_heading: 0.0
 
-### Modificado narawheelchair.xacro
+### .gazebo
 
-<joint name="robot_footprint_joint" type="fixed"
-  <origin xyz="0.25395 0 0" rpy="0 0 0"
+Modificado o angulo do lidar para não se limitar a 180º, como Caio adicionou o filtro do laser, automaticamente o espaço 3d da cadeira é filtrado
 
-trocado a origim para que robot_footprint esteja no centro do differential_drive, em vez de estar um pouco na frente
+<!-- Updated Hokuyo Link ROS2 -->
+ <!-- <gazebo reference="hokuyo_link"> -->
+    ...
+        ...
+            <min_angle>-3.14</min_angle>
+            <max_angle>3.14</max_angle> 
 
-Aparentemente, é o melhor lugar possivel para que os calculos da navegação autonoma funcionem eficientemente
+### Laser Filters
+
+Modificado box de filtro, antes, estava considerando um ponto lateral da carcaça como obstáculo
+
+### nav2_launch.py
+
+Adicionado Remapping de tópico no behavior server, no default ele publica no /cmd_vel mas não há parametros para o yaml para trocar o tópico publicador
+
+remappings=[('/cmd_vel', '/noblenara/cmd_vel')]
