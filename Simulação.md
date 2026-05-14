@@ -62,10 +62,14 @@ Estes são os comandos básicos para rodar a simulação via terminal
 bash
 $ ros2 launch smartwheelchair worldmuseum.launch.py
 # Em outro terminal:
-$ ros2 launch smartwheelchair chair.launch.py
+$ ros2 launch smartwheelchair noblenara.launch.py robot_codename:=alfa
 ```
 
-### Inicializando o Slam
+Para inicializar múltiplos modelos, modifique 'alfa' para um outro nome qualquer, contudo, tenha certeza que o primeiro modelo não se encontre na área inicial (mova-o com teleop do gazebo ou de outra forma)
+
+***Até agora o mehrere funciona apenas até aqui!***
+
+### Inicializando o Slam*
 
 Para inicializar o slam juntamente com o rviz, simplesmente rode o comando: 
 
@@ -81,7 +85,7 @@ bash
 $ ros2 service call /slam_toolbox/save_map slam_toolbox/srv/SaveMap "name: {data: 'my_map'}"
 ```
 
-### Inicializando a Navegação Autônoma
+### Inicializando a Navegação Autônoma*
 
 A navegação pode ser inicilizada com o seguinte comando:
 
