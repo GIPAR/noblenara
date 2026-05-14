@@ -32,13 +32,10 @@ def generate_launch_description():
     laser_filter_node = Node(
         package='laser_filters',
         executable='scan_to_scan_filter_chain',
+        namespace=['noblenara/', robot_codename],
         parameters=[
             filter_config,
             {'filter1.params.box_frame': ['noblenara/', robot_codename, '/robot_footprint']}
-        ],
-        remappings=[ 
-            ('scan', ['/noblenara/', robot_codename ,'/scan']),
-            ('scan_filtered', ['/noblenara/', robot_codename,'/scan_filtered']) 
         ],
         output='screen'
     )
@@ -52,7 +49,7 @@ def generate_launch_description():
             {'robot_description': robot_description_command},
             {'use_sim_time': True},
             {'frame_prefix': ['noblenara/', robot_codename, '/']}],
-        remappings=[ ('/joint_states', ['/noblenara/', robot_codename ,'/joint_states']), ('/robot_description', ['/noblenara/', robot_codename ,'/robot_description']) ],
+        namespace=['noblenara/', robot_codename],
         output='screen'
     )
     
@@ -66,7 +63,7 @@ def generate_launch_description():
                   '-x', '0.0', 
                   '-y', '0.0', 
                   '-z', '0.1'],
-        remappings=[ ('/robot_description', ['/noblenara/', robot_codename ,'/robot_description']) ],
+        remappings=[ ('/robot_description', ['/noblenara/', robot_codename, '/robot_description']) ],
         output='screen'
     )
     
@@ -98,6 +95,7 @@ def generate_launch_description():
             ['/noblenara/', robot_codename,'/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo'],
             ['/noblenara/', robot_codename,'/camera_link/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo'],
           ],
+        name=['noblenara_', robot_codename, '_ros_gz_bridge'],
         output='screen'
     )
     

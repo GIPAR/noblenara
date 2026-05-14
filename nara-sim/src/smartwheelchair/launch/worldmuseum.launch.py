@@ -46,7 +46,8 @@ def generate_launch_description():
         arguments=[
             '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'
         ],
-        output='screen'
+        name='ros_gz_global_bridge',
+        output='screen',
     )
     
     return LaunchDescription([
