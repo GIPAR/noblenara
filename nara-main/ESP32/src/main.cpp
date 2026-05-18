@@ -269,6 +269,14 @@ void setup() {
     ROSIDL_GET_MSG_TYPE_SUPPORT(nav_msgs, msg, Odometry),
     ODOM_TOPIC);
 
+    encoder_msg.header.frame_id.data = (char *)"odom";
+    encoder_msg.header.frame_id.size = strlen("odom");
+    encoder_msg.header.frame_id.capacity = encoder_msg.header.frame_id.size + 1;
+
+    encoder_msg.child_frame_id.data = (char *)"robot_footprint";
+    encoder_msg.child_frame_id.size = strlen("robot_footprint");
+    encoder_msg.child_frame_id.capacity = encoder_msg.child_frame_id.size + 1;
+
   rclc_subscription_init_default(
     &cmd_vel_sub,
     &node,
