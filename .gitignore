@@ -1,0 +1,21 @@
+# Pastas geradas pelo colcon
+build/
+install/
+log/
+
+# Cache e temporários
+*.pyc
+__pycache__/
+*.sdf~
+*.world~
+.DS_Store
+Thumbs.db
+
+# Pasta de Configuração VS Code e IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Cache do Gazebo
+.gazebo/

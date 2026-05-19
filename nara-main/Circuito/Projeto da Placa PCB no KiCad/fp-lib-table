@@ -1,0 +1,6 @@
+(fp_lib_table
+	(version 7)
+	(lib (name "LLC_4CH_I2C") (type "KiCad") (uri "${KIPRJMOD}/Componentes e Bibliotecas Extras/Conversor de Nível Lógico/LLC_4CH_I2C.pretty") (options "") (descr ""))
+	(lib (name "ESP32_Footprints") (type "KiCad") (uri "${KIPRJMOD}/Componentes e Bibliotecas Extras/ESP32-DevKit-V1-DOIT-main/ESP32_Footprints.pretty") (options "") (descr ""))
+	(lib (name "usini_sensors") (type "KiCad") (uri "${KIPRJMOD}/Componentes e Bibliotecas Extras/usini_kicad_sensors-main/usini_sensors.pretty") (options "") (descr ""))
+)
