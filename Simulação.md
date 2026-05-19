@@ -67,22 +67,22 @@ $ ros2 launch smartwheelchair noblenara.launch.py robot_codename:=alfa
 
 Para inicializar múltiplos modelos, modifique 'alfa' para um outro nome qualquer, contudo, tenha certeza que o primeiro modelo não se encontre na área inicial (mova-o com teleop do gazebo ou de outra forma)
 
-***Até agora o mehrere funciona apenas até aqui!***
+### Inicializando o Slam
 
-### Inicializando o Slam*
-
-Para inicializar o slam juntamente com o rviz, simplesmente rode o comando: 
+Para inicializar o slam de um dos robôs, simplesmente rode o comando: 
 
 ```
 bash
-$ ros2 launch smartwheelchair slam_rviz.launch.py # use slam.launch.py para abrir apenas o slam
+$ ros2 launch smartwheelchair slam_rviz.launch.py robot_codename:=alfa #Use slam.launch.py para abrir apenas o slam
 ```
+
+O robot_codename deve ser o mesmo do robô desejado, anteriormente inicializado no mundo. Não obstante, podemos inicializar este comando novamente em um terminal alternativo para outro robô
 
 Por fim, caso queira, o mapa pode ser salvo diretamente pelo slam_toolbox
 
 ```
 bash
-$ ros2 service call /slam_toolbox/save_map slam_toolbox/srv/SaveMap "name: {data: 'my_map'}"
+$ ros2 service call /noblenara/alfa/slam_toolbox/save_map slam_toolbox/srv/SaveMap "name: {data: 'my_map'}" # Troque "alfa" pelo codenome do robô selecionado
 ```
 
 ### Inicializando a Navegação Autônoma*

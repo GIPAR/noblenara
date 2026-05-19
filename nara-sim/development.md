@@ -1,8 +1,31 @@
 # Mehrere Commits
 
-Repoistório para inclusão de múltiplos robôs em uma única simulação do gazebo
+Repositório para inclusão de múltiplos robôs em uma única simulação do gazebo
 
-## Mehrere Second Commit
+## Mehrere Third Commit - Slam
+
+Permitido o uso de múltiplos Slam's de forma conjunta
+
+### Slam Launch
+
+Modificado funcionamento do slam launch e adicionado robot_codename para permitir inicialização do slam para um robô em específico
+
+Um código em python no slam_rviz.launch.py foi adicionado para ler o arquivo de config do rviz e modifica as linhas com o codenome do robô
+
+ros2 launch smartwheelchair slam_rviz.launch.py robot_codename:=alfa #ou
+ros2 launch smartwheelchair slam.launch.py robot_codename:=alfa
+
+### Slam Params
+
+Trocado header name para /**:  # Permite o reconhecimento das configurações independente do nome do nó do slam
+
+### Rviz Config File
+
+Modificado arquivo de configurações, adicionando-se os prefixos em cada tópico
+
+## Mehrere Second Commit - Nodes
+
+Isolado o nome dos nós
 
 ### Launchs
 
@@ -18,7 +41,7 @@ Modificado top level heading para
 
 Sem esta modificação, quando modificamos o nome do nó ele não consegue ler o yaml
 
-## Mehrere First Commit - 14 de Maio de 2026
+## Mehrere First Commit - Topics and Frames | General
 
 Commit que permite o funcionamento inicial de múltiplos robôs
 
