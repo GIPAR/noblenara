@@ -11,10 +11,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Pasta de Configuração VS Code
-.vscode/
-
-# Editores e IDEs
+# Pasta de Configuração VS Code e IDEs
 .vscode/
 .idea/
 *.swp
