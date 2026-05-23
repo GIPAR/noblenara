@@ -1,0 +1,5 @@
+sudo apt install ros-jazzy-slam-toolbox
+
+sudo apt install ros-jazzy-ros-gz-sim
+sudo apt install ros-jazzy-gz-ros2-control
+sudo apt install ros-jazzy-robot-localization
