@@ -118,6 +118,4 @@ ros2 launch smartwheelchair slam.launch.py
 
 Para mover a cadeira, utilize o repositório da HMI:
 
-```text
 [NobleNara HMI](https://github.com/GIPAR/noblenara-ihm)
-```
