@@ -26,6 +26,8 @@ $ sudo apt install ros-jazzy-gz-ros2-control
 $ sudo apt install ros-jazzy-laser-filters
 $ sudo apt install ros-jazzy-slam-toolbox
 $ sudo apt install ros-jazzy-nav2-map-server
+$ sudo apt install ros-jazzy-navigation2
+$ sudo apt install ros-jazzy-nav2-bringup
 ```
 
 ### 1.2 - Set - Preparando o Workspace
@@ -87,11 +89,11 @@ $ ros2 service call /noblenara/alfa/slam_toolbox/save_map slam_toolbox/srv/SaveM
 
 ### Inicializando a Navegação Autônoma*
 
-A navegação pode ser inicilizada com o seguinte comando:
+A navegação pode ser inicilizada individualmente para cada robô com o seguinte comando:
 
 ```
 bash
-$ ros2 launch smartwheelchair nav2_launch.py use_sim_time:=True
+$ ros2 launch smartwheelchair nav2_launch.py robot_codename:=alfa
 ```
 
 No Rviz2, utilize "2D Goal Pose" para comandar a cadeira pela navegação autônoma

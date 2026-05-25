@@ -8,7 +8,6 @@ from launch.substitutions import LaunchConfiguration
 def rviz_configurer(context, *args, **kwargs):
     
     # Setup Inicial do Configurador
-    # Leitura do Arquivo de configurações do rviz com substituição do conteúdo, preparando-o para ser usado de acordo com o codename do robô
     pkg_share = get_package_share_directory('smartwheelchair')
     codename = LaunchConfiguration('robot_codename').perform(context)
     rviz_config_file = os.path.join( pkg_share, 'config', 'slam_config.rviz' )
@@ -55,7 +54,7 @@ def generate_launch_description():
                 'odom_frame': ['noblenara/', robot_codename, '/odom'],
                 'base_frame': ['noblenara/', robot_codename, '/robot_footprint'],
                 'scan_topic': ['/noblenara/', robot_codename, '/scan_filtered'],
-                'map_frame':  ['/noblenara/', robot_codename, '/map'],
+                'map_frame':  ['noblenara/', robot_codename, '/map'],
             }
         ],
         remappings=[ ('/map', ['/noblenara/', robot_codename, '/map']), ('/map_metadata', ['/noblenara/', robot_codename, '/map_metadata']) ],
