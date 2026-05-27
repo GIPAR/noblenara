@@ -19,7 +19,7 @@ def generate_launch_description():
     # Declare launch arguments
     world_file_arg = DeclareLaunchArgument(
         'world_file',
-        default_value=PathJoinSubstitution([pkg_share, 'worlds', 'museum.world']),
+        default_value=PathJoinSubstitution([pkg_share, 'worlds', 'museum_default.world']),
         description='Full path to world file'
     )
     

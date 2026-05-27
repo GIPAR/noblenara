@@ -24,7 +24,7 @@ def rviz_configurer(context, *args, **kwargs):
     rviz_launch_node = Node(
         package='rviz2',
         executable='rviz2',
-        name='rviz2',
+        name=['noblenara_', codename, '_rviz2'],
         arguments=['-d', rviz_rewrited_config_file],
         parameters=[{'use_sim_time': True}],
         output='screen'
