@@ -1,85 +1,92 @@
 <?xml version="1.0" ?>
 <robot name="NARA" xmlns:xacro="http://www.ros.org/wiki/xacro" >
 
-<xacro:property name="body_color" value="Gazebo/Silver" />
+  <!-- Namespace do Robô, para múltiplos robôs apenas troque "default" -->
+  <xacro:property name="namespace" value="$(arg robot_name)" />
+  <xacro:property name="body_color" value="Gazebo/Silver" />
 
-<gazebo>
-  <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
-  </plugin>
-</gazebo>
+  <!-- Configurado agora no .world -->
+  <!-- <gazebo>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+    </plugin>
+  </gazebo> -->
 
-<gazebo reference="base_link">
-  <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
-  <gravity>true</gravity>
-</gazebo>
+  <!-- Referências do Gazebo -->
+  <gazebo reference="base_link">
+    <material>${body_color}</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <selfCollide>true</selfCollide>
+    <gravity>true</gravity>
+  </gazebo>
 
-<gazebo reference="LeftBwheel_1">
-  <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
-</gazebo>
+  <gazebo reference="LeftBwheel_1">
+    <material>${body_color}</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <selfCollide>true</selfCollide>
+  </gazebo>
 
-<gazebo reference="RightBwheel_1">
-  <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
-</gazebo>
+  <gazebo reference="RightBwheel_1">
+    <material>${body_color}</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <selfCollide>true</selfCollide>
+  </gazebo>
 
-<gazebo reference="RightFwheel_1">
-  <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
-</gazebo>
+  <gazebo reference="RightFwheel_1">
+    <material>${body_color}</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <selfCollide>true</selfCollide>
+  </gazebo>
 
-<gazebo reference="LeftFwheel_1">
-  <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
-</gazebo>
+  <gazebo reference="LeftFwheel_1">
+    <material>${body_color}</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <selfCollide>true</selfCollide>
+  </gazebo>
 
-<gazebo reference="RightCaster_1">
-  <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
-</gazebo>
+  <gazebo reference="RightCaster_1">
+    <material>${body_color}</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <selfCollide>true</selfCollide>
+  </gazebo>
 
-<gazebo reference="LeftCaster_1">
-  <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
-</gazebo>
+  <gazebo reference="LeftCaster_1">
+    <material>${body_color}</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <selfCollide>true</selfCollide>
+  </gazebo>
 
-<!-- Differential Plugin - ROS2 -->
-<gazebo>
-  <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
-    <left_joint>left_wheel_joint</left_joint>
-    <right_joint>right_wheel_joint</right_joint>
-    <wheel_separation>0.519</wheel_separation>
-    <wheel_radius>0.1776</wheel_radius>
-    <topic>/noblenara/cmd_vel</topic>
-    <odom_topic>/noblenara/odom</odom_topic>
-    <tf_topic>tf</tf_topic>
-    <frame_id>odom</frame_id>
-    <child_frame_id>robot_footprint</child_frame_id>
-    <update_rate>30</update_rate>
-  </plugin>
-</gazebo>
 
-<!-- Robot State Publisher Plugin, verificar update rate -->
-<gazebo>
-  <plugin filename="libgz-sim-joint-state-publisher-system.so" name="gz::sim::systems::JointStatePublisher">
-    <update_rate>10</update_rate>
-  </plugin>
-</gazebo>
+
+  <!-- Plugin de Direção Diferencial - ROS2 -->
+  <gazebo>
+    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+      <wheel_separation>0.519</wheel_separation>
+      <wheel_radius>0.1776</wheel_radius>
+      <topic>/noblenara/$(arg robot_name)/cmd_vel</topic>
+      <odom_topic>/noblenara/$(arg robot_name)/odom</odom_topic>
+      <tf_topic>tf</tf_topic>
+      <frame_id>noblenara/$(arg robot_name)/odom</frame_id>
+      <child_frame_id>noblenara/$(arg robot_name)/robot_footprint</child_frame_id>
+      <update_rate>20</update_rate>
+    </plugin>
+  </gazebo>
+
+  <!-- Robot State Publisher Plugin, verificar update rate -->
+  <gazebo>
+    <plugin filename="libgz-sim-joint-state-publisher-system.so" name="gz::sim::systems::JointStatePublisher">
+      <update_rate>20</update_rate>
+      <topic>/noblenara/$(arg robot_name)/joint_states</topic>
+    </plugin>
+  </gazebo>
 
   <joint name="camera_joint" type="fixed">
     <axis xyz="0 1 0" />
@@ -88,7 +95,7 @@
     <child link="camera_link"/>
   </joint>
 
-  <!-- Camera -->
+  <!-- Configuração da Zed2i -->
   <link name="camera_link">
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -116,8 +123,7 @@
     <material>Gazebo/Grey</material>
   </gazebo>
 
-  <!-- Camera User -->
-
+  <!-- Configuração da Camera de Usuário -->
   <joint name="camera_user_joint" type="fixed">
     <axis xyz="0 1 0" />
     <origin xyz="0.25 0.2847 1.065" rpy="3.14 2.94 0.4"/>
@@ -153,13 +159,13 @@
     <material>Gazebo/Grey</material>
   </gazebo>
 
- <!-- Updated Hokuyo Link ROS2 -->
+ <!-- Lidar -->
  <gazebo reference="hokuyo_link">
     <sensor type="gpu_lidar" name="head_hokuyo_sensor">
-      <gz_frame_id>hokuyo_link</gz_frame_id>
+      <gz_frame_id>noblenara/$(arg robot_name)/hokuyo_link</gz_frame_id>
       <pose>0 0 0 0 0 0</pose>
-      <topic>/noblenara/scan</topic>
-      <update_rate>40</update_rate>
+      <topic>/noblenara/$(arg robot_name)/scan</topic>
+      <update_rate>20</update_rate>
       <enable_metrics>false</enable_metrics>
       <ray>
         <scan>
@@ -190,22 +196,23 @@
     </sensor>
   </gazebo>
 
-<!-- Updated Cameras for ROS2 - User + Depth-->
+<!-- Cãmera Zed2i - Configurado para se assemelhar ao real -->
 <gazebo reference="camera_link">
   <sensor name="camera_link_zed2i" type="rgbd_camera">
     <pose>0 0 0 0 0 0</pose>
-    <topic>/noblenara/camera_link</topic>
-    <update_rate>15</update_rate>  <!-- ZED 2i typical framerate -->
+    <topic>/noblenara/$(arg robot_name)/camera_link</topic>
+    <gz_frame_id>noblenara/$(arg robot_name)/camera_link</gz_frame_id>
+    <update_rate>15</update_rate> 
     <camera>
-      <horizontal_fov>1.91986</horizontal_fov>  <!-- ~110° ZED 2i FOV -->
+      <horizontal_fov>1.91986</horizontal_fov>
       <image>
         <width>640</width>  <!-- ZED 2i max resolution is 1920x1080 | Res Abaixada para a simulação ser mais leve -->
         <height>480</height>
         <format>R8G8B8</format>
       </image>
       <clip>
-        <near>0.2</near>    <!-- ZED 2i min range -->
-        <far>20.0</far>     <!-- ZED 2i max range -->
+        <near>0.2</near>
+        <far>20.0</far>
       </clip>
     </camera>
     <always_on>true</always_on>
@@ -213,11 +220,11 @@
   </sensor>
 </gazebo>
 
-<!-- camera -->
+<!-- Câmera User -->
   <gazebo reference="camera_user_link">
     <sensor type="camera" name="camera_user">
       <pose>0 0 0 0 0 0</pose>
-      <topic>/noblenara/camera_user</topic>
+      <topic>/noblenara/$(arg robot_name)/camera_user</topic>
       <update_rate>30.0</update_rate>
       <camera name="head">
         <horizontal_fov>1.3962634</horizontal_fov>

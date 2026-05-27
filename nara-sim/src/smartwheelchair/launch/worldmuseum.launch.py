@@ -4,6 +4,7 @@ from launch import LaunchDescription
 from launch.actions import ExecuteProcess, DeclareLaunchArgument, SetEnvironmentVariable
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
+from launch_ros.actions import Node
 
 def generate_launch_description():
     # Get package share directory
@@ -18,7 +19,7 @@ def generate_launch_description():
     # Declare launch arguments
     world_file_arg = DeclareLaunchArgument(
         'world_file',
-        default_value=PathJoinSubstitution([pkg_share, 'worlds', 'museum.world']),
+        default_value=PathJoinSubstitution([pkg_share, 'worlds', 'museum_default.world']),
         description='Full path to world file'
     )
     
@@ -39,9 +40,20 @@ def generate_launch_description():
         output='screen'
     )
     
+    global_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=[
+            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'
+        ],
+        name='ros_gz_global_bridge',
+        output='screen',
+    )
+    
     return LaunchDescription([
         gazebo_resource_path,
         world_file_arg,
         gazebo_server,
         gazebo_client,
+        global_bridge,
     ])

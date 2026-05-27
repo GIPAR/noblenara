@@ -4,6 +4,8 @@
 <xacro:include filename="$(find smartwheelchair)/urdf/materials.xacro" />
 <xacro:include filename="$(find smartwheelchair)/urdf/narawheelchair.gazebo" />
 
+<xacro:arg name="robot_name" default="alfa"/>
+
 <link name="robot_footprint"></link>
 
 <link name="base_link">
