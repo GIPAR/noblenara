@@ -197,7 +197,7 @@ sleep 5
 echo "Iniciando no Docker..."
 docker exec noblenara bash -c \
   'source /opt/ros/jazzy/setup.bash && \
-   python3 /NARA/scripts/tablet_cam_node.py'
+   python3 /noblenara_ws/tablet_cam_node.py'
 ```
 
 ---
