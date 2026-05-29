@@ -171,7 +171,7 @@ void callback_encoder(){
   encoder_msg.twist.twist.linear.x = linearVel;
   encoder_msg.twist.twist.linear.y = 0.0;
   encoder_msg.twist.twist.linear.z = 0.0;
-  // encoder_msg.twist.twist.linear.y = input_left; // Para debug de Encoders, caso necessário
+  // encoder_msg.twist.twist.linear.y = input_left; // Para debug de Encoders
   // encoder_msg.twist.twist.linear.z = input_right;
   
   encoder_msg.twist.twist.angular.x = 0.0;
@@ -250,14 +250,6 @@ void setup() {
   encoderLeft.clearCount();
   encoderRight.clearCount();
 
-  encoder_msg.header.frame_id.data = (char *)"odom";
-  encoder_msg.header.frame_id.size = strlen("odom");
-  encoder_msg.header.frame_id.capacity = encoder_msg.header.frame_id.size + 1;
-
-  encoder_msg.child_frame_id.data = (char *)"robot_footprint";
-  encoder_msg.child_frame_id.size = strlen("robot_footprint");
-  encoder_msg.child_frame_id.capacity = encoder_msg.child_frame_id.size + 1;
-
   // MCPWM (Modulo PWN Física da ESP32)
   mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, MOTOR_LEFT_RPWM);
   mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, MOTOR_LEFT_LPWM);
@@ -290,16 +282,6 @@ void setup() {
   pinMode(VOLTAGE1_PIN, INPUT);
   pinMode(VOLTAGE2_PIN, INPUT);
 
-  battery_msg.present = true;
-  battery_msg.power_supply_status = sensor_msgs__msg__BatteryState__POWER_SUPPLY_STATUS_DISCHARGING;
-  battery_msg.power_supply_health = sensor_msgs__msg__BatteryState__POWER_SUPPLY_HEALTH_GOOD;
-  battery_msg.power_supply_technology = sensor_msgs__msg__BatteryState__POWER_SUPPLY_TECHNOLOGY_VRLA;
-
-  static float cell_data[2];                                  //Verificar se estas linhas são necessárias
-  battery_msg.cell_voltage.data = cell_data;
-  battery_msg.cell_voltage.capacity = 2;
-  battery_msg.cell_voltage.size = 0;
-
   // Inicialização das Variáveis do Tempo (Contra possíveis erros no código)
   timehelper = millis();
   watchdog_cmdvel = millis();
@@ -316,6 +298,30 @@ void setup() {
   rclc_node_init_default(&node, "esp32_imu", "", &support);
 
   sensor_msgs__msg__BatteryState__init(&battery_msg);
+  nav_msgs__msg__Odometry__init(&encoder_msg);
+
+  // Setup das Mensagens
+  // encoder_msg.header.frame_id.data = (char *)"noblenara/mirai/odom";
+  // encoder_msg.header.frame_id.size = strlen("noblenara/mirai/odom");
+  encoder_msg.header.frame_id.data = (char *)"odom";
+  encoder_msg.header.frame_id.size = strlen("odom");
+  encoder_msg.header.frame_id.capacity = encoder_msg.header.frame_id.size + 1;
+
+  // encoder_msg.child_frame_id.data = (char *)"noblenara/mirai/robot_footprint";
+  // encoder_msg.child_frame_id.size = strlen("noblenara/mirai/robot_footprint");
+  encoder_msg.child_frame_id.data = (char *)"robot_footprint";
+  encoder_msg.child_frame_id.size = strlen("robot_footprint");
+  encoder_msg.child_frame_id.capacity = encoder_msg.child_frame_id.size + 1;
+
+  battery_msg.present = true;
+  battery_msg.power_supply_status = sensor_msgs__msg__BatteryState__POWER_SUPPLY_STATUS_DISCHARGING;
+  battery_msg.power_supply_health = sensor_msgs__msg__BatteryState__POWER_SUPPLY_HEALTH_GOOD;
+  battery_msg.power_supply_technology = sensor_msgs__msg__BatteryState__POWER_SUPPLY_TECHNOLOGY_VRLA;
+
+  static float cell_data[2];                                  //Verificar se estas linhas são necessárias
+  battery_msg.cell_voltage.data = cell_data;
+  battery_msg.cell_voltage.capacity = 2;
+  battery_msg.cell_voltage.size = 0;
 
   rclc_publisher_init_default(
     &encoder_pub,
