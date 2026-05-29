@@ -6,33 +6,36 @@
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
 
-#include <Adafruit_MPU6050.h>       //IMU
+#include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
-#include <ESP32Encoder.h>           //ENCODER
-#include <driver/mcpwm.h>           //Ponte H
-#include "soc/mcpwm_periph.h" 
+#include <ESP32Encoder.h>
+#include <driver/mcpwm.h>
+#include "soc/mcpwm_periph.h"
 
-#include <sensor_msgs/msg/imu.h>    //Messages
-#include <nav_msgs/msg/odometry.h>  
+#include <sensor_msgs/msg/imu.h>
+#include <nav_msgs/msg/odometry.h> 
 #include <geometry_msgs/msg/twist.h>
-#include <std_msgs/msg/string.h>    //topic for manual debugging
+#include <sensor_msgs/msg/battery_state.h>
 
 #include <QuickPID.h>
 
 // MicroROS
 rclc_support_t support;
 rcl_allocator_t allocator;
+rcl_init_options_t init_options;
 rcl_node_t node;
 rclc_executor_t executor;
+size_t ros_domain;
 
 //Publishers | Subscribers | Messages - MicroROS
 //rcl_publisher_t imu_pub;
 //sensor_msgs__msg__Imu imu_msg;
 //rcl_timer_t timer_imu;
 
-rcl_publisher_t chat_pub;
-std_msgs__msg__String chat_msg;
+rcl_publisher_t battery_pub;
+sensor_msgs__msg__BatteryState battery_msg;
+rcl_timer_t timer_battery;
 
 rcl_subscription_t cmd_vel_sub;
 geometry_msgs__msg__Twist cmd_vel_msg;
@@ -85,19 +88,12 @@ QuickPID pidRight(&input_right, &output_right, &setpoint_right,
 
 void callback_watchdog();
 void callback_encoder();
+void callback_battery();
 
-void chat_publisher(const char* message, int number){
-  char chat_buf[64];
-  snprintf(chat_buf, sizeof(chat_buf), message, number);
-  chat_msg.data.data = chat_buf;
-  chat_msg.data.size = strlen(chat_buf);
-  chat_msg.data.capacity = sizeof(chat_buf);
-  rcl_publish(&chat_pub, &chat_msg, NULL);
-}
-
-//Funções Callbacks que são chamados pelo executor do ROS no loop
+//=============================================================================
+// FUNÇÕES DE CONTROLE DE VELOCIDADE
+//=============================================================================
 void callback_cmd_vel(const void * msgin){
-  //Possivelmente no futuro: Combinar (PID + Velocity Profiling):
   watchdog_cmdvel = millis();
 
   geometry_msgs__msg__Twist * msg = (geometry_msgs__msg__Twist *) msgin;
@@ -109,36 +105,36 @@ void callback_cmd_vel(const void * msgin){
 }
 
 void callback_motorcontrol(){
-  input_left = newLeft / dt;
-  input_right = newRight / dt;
-  
-  setpoint_left = targetleftVel;
-  setpoint_right = targetrightVel;
+    input_left = newLeft / dt;
+    input_right = newRight / dt;
+    
+    setpoint_left = targetleftVel;
+    setpoint_right = targetrightVel;
 
-  if(pidRight.Compute()){
-    if(output_right >=0){
-      mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A);
-      mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B, output_right);
-      mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B, MCPWM_DUTY_MODE_0);
+    if(pidRight.Compute()){
+      if(output_right >=0){
+        mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A);
+        mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B, output_right);
+        mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B, MCPWM_DUTY_MODE_0);
+      }
+      else{
+        mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B);
+        mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A, fabs(output_right));
+        mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A, MCPWM_DUTY_MODE_0);
+      }
     }
-    else{
-      mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B);
-      mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A, fabs(output_right));
-      mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A, MCPWM_DUTY_MODE_0);
+    if(pidLeft.Compute()){
+      if(output_left >=0){
+        mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A);
+        mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B, output_left);
+        mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B, MCPWM_DUTY_MODE_0);
+      }
+      else{
+        mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B);
+        mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, fabs(output_left));
+        mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, MCPWM_DUTY_MODE_0);
+      }
     }
-  }
-  if(pidLeft.Compute()){
-    if(output_left >=0){
-      mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A);
-      mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B, output_left);
-      mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B, MCPWM_DUTY_MODE_0);
-    }
-    else{
-      mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B);
-      mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, fabs(output_left));
-      mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, MCPWM_DUTY_MODE_0);
-    }
-  }
 }
 
 void callback_encoder(){
@@ -147,7 +143,7 @@ void callback_encoder(){
 
   newLeft = CountLeft * METERS_PER_COUNT;                      //Atualizando as variáveis de armazenamento
   newRight = CountRight * METERS_PER_COUNT;
-  newCenter = (newLeft + newRight) / 2.0;        
+  newCenter = (newLeft + newRight) / 2.0;
 
   timestamp = millis();
   dt = (timestamp - timehelper) / 1000.0;
@@ -175,6 +171,8 @@ void callback_encoder(){
   encoder_msg.twist.twist.linear.x = linearVel;
   encoder_msg.twist.twist.linear.y = 0.0;
   encoder_msg.twist.twist.linear.z = 0.0;
+  // encoder_msg.twist.twist.linear.y = input_left; // Para debug de Encoders, caso necessário
+  // encoder_msg.twist.twist.linear.z = input_right;
   
   encoder_msg.twist.twist.angular.x = 0.0;
   encoder_msg.twist.twist.angular.y = 0.0;
@@ -196,14 +194,14 @@ void callback_watchdog(rcl_timer_t * timer, int64_t last_call_time){
   };
 
   callback_encoder();
+  callback_motorcontrol();
   timehelper = millis();
   encoderLeft.clearCount();
   encoderRight.clearCount();
-  callback_motorcontrol();
-  rcl_ret_t ret = rcl_publish(&encoder_pub, &encoder_msg, NULL);
-  if (ret != RCL_RET_OK) {
-    chat_publisher("Falha na publicação da odometria!; Código ", ret);
 
+  rcl_ret_t ret = rcl_publish(&encoder_pub, &encoder_msg, NULL);
+
+  if (ret != RCL_RET_OK) {
     mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A);
     mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B);
     mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A);
@@ -211,63 +209,125 @@ void callback_watchdog(rcl_timer_t * timer, int64_t last_call_time){
   }
 }
 
+//==============================================================
+//                        FUNÇÕES AUXILIARES
+void callback_battery(rcl_timer_t * timer, int64_t last_call_time){
+  if (timer == NULL) return;
+
+  float raw1 = analogRead(VOLTAGE1_PIN);
+  float voltage1 = raw1 * (3.3f / 4095.1f) * VOLTAGE_RATIO;
+
+  float raw2 = analogRead(VOLTAGE2_PIN);
+  float voltage2 = raw2 * (3.3f / 4095.1f) * VOLTAGE_RATIO;
+
+  battery_msg.cell_voltage.data[0] = voltage1;
+  battery_msg.cell_voltage.data[1] = voltage2;
+  battery_msg.cell_voltage.size = 2;
+  battery_msg.voltage = voltage1 + voltage2;
+  battery_msg.header.stamp.sec = rmw_uros_epoch_millis() / 1000;
+  battery_msg.header.stamp.nanosec = rmw_uros_epoch_nanos();
+
+  rcl_ret_t ret = rcl_publish(&battery_pub, &battery_msg, NULL);
+  if (ret != RCL_RET_OK) {
+    Serial.println("Battery publish FAILED");
+  }
+}
+
+//==============================================================
+//                              SETUP
 void setup() {
   Serial.begin(115200);
-  
+
   // CONFIGURAÇÕES
-  set_microros_serial_transports(Serial);                   //CONFIG microROS
+  set_microros_serial_transports(Serial);
   delay(500);
 
-  //ENCODER
-  ESP32Encoder::useInternalWeakPullResistors = UP;        // ou DOWN/NONE, dependendo do seu hardware
+  // ENCODER
+  ESP32Encoder::useInternalWeakPullResistors = UP;
   encoderLeft.attachFullQuad(ENCODER_LEFT_A, ENCODER_LEFT_B);
   encoderRight.attachFullQuad(ENCODER_RIGHT_A, ENCODER_RIGHT_B);
 
-  encoderLeft.clearCount();                                 // Zerar contadores
+  encoderLeft.clearCount();
   encoderRight.clearCount();
 
-  pinMode(MOTOR_EN, OUTPUT);
-  digitalWrite(MOTOR_EN, HIGH);   // Enable both BTS7960 drivers
+  encoder_msg.header.frame_id.data = (char *)"odom";
+  encoder_msg.header.frame_id.size = strlen("odom");
+  encoder_msg.header.frame_id.capacity = encoder_msg.header.frame_id.size + 1;
 
+  encoder_msg.child_frame_id.data = (char *)"robot_footprint";
+  encoder_msg.child_frame_id.size = strlen("robot_footprint");
+  encoder_msg.child_frame_id.capacity = encoder_msg.child_frame_id.size + 1;
+
+  // MCPWM (Modulo PWN Física da ESP32)
   mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, MOTOR_LEFT_RPWM);
   mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, MOTOR_LEFT_LPWM);
   mcpwm_gpio_init(MCPWM_UNIT_1, MCPWM0A, MOTOR_RIGHT_RPWM);
   mcpwm_gpio_init(MCPWM_UNIT_1, MCPWM0B, MOTOR_RIGHT_LPWM);
 
-  // MCPWM configuration structure
   mcpwm_config_t pwm_config;
-  pwm_config.frequency = 20000;           // 20kHz - good for BTS7960
-  pwm_config.cmpr_a = 0;                  // Start at 0% duty cycle
-  pwm_config.cmpr_b = 0;                  // Start at 0% duty cycle
+  pwm_config.frequency = 20000;           // 20kHz
+  pwm_config.cmpr_a = 0;                  // Começa em 0% duty cycle
+  pwm_config.cmpr_b = 0;                  // Começa em 0% duty cycle
   pwm_config.counter_mode = MCPWM_UP_COUNTER;
-  pwm_config.duty_mode = MCPWM_DUTY_MODE_0;  // Active high
+  pwm_config.duty_mode = MCPWM_DUTY_MODE_0;
 
   mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &pwm_config);
   mcpwm_init(MCPWM_UNIT_1, MCPWM_TIMER_0, &pwm_config);
 
-  // PID COnfiguration -> Set to TIMER mode (called by external timer)
+  pinMode(MOTOR_EN, OUTPUT);
+  digitalWrite(MOTOR_EN, HIGH);                              // Ativação do Enable das Pontes H's
+  
+  // PID COnfiguration -> Set: TIMER mode (Chamado por TIMER externo)
   pidLeft.SetMode(QuickPID::Control::timer);
-  pidLeft.SetOutputLimits(-100.0, 100.0);  // ← Changed to percentage!
-  pidLeft.SetSampleTimeUs(20000); // 20ms = 50Hz
+  pidLeft.SetOutputLimits(-100.0, 100.0);  // Porcentagem
+  pidLeft.SetSampleTimeUs(20000);          // 20ms = 50Hz
   
   pidRight.SetMode(QuickPID::Control::timer);
-  pidRight.SetOutputLimits(-100.0, 100.0);  // ← Changed to percentage!
+  pidRight.SetOutputLimits(-100.0, 100.0);
   pidRight.SetSampleTimeUs(20000);
 
-  //Variáveis de tempo
-  timehelper = millis();                                    // Inicializar timestamp      ***
-  watchdog_cmdvel = millis();                               //Inicializar o timing do watchdog pra não dar bug
+  // Battery Control Config
+  pinMode(VOLTAGE1_PIN, INPUT);
+  pinMode(VOLTAGE2_PIN, INPUT);
 
+  battery_msg.present = true;
+  battery_msg.power_supply_status = sensor_msgs__msg__BatteryState__POWER_SUPPLY_STATUS_DISCHARGING;
+  battery_msg.power_supply_health = sensor_msgs__msg__BatteryState__POWER_SUPPLY_HEALTH_GOOD;
+  battery_msg.power_supply_technology = sensor_msgs__msg__BatteryState__POWER_SUPPLY_TECHNOLOGY_VRLA;
+
+  static float cell_data[2];                                  //Verificar se estas linhas são necessárias
+  battery_msg.cell_voltage.data = cell_data;
+  battery_msg.cell_voltage.capacity = 2;
+  battery_msg.cell_voltage.size = 0;
+
+  // Inicialização das Variáveis do Tempo (Contra possíveis erros no código)
+  timehelper = millis();
+  watchdog_cmdvel = millis();
+
+  // Setup microROS
   allocator = rcl_get_default_allocator();
-  rclc_support_init(&support, 0, NULL, &allocator);
+  ros_domain = 77;
+
+  init_options = rcl_get_zero_initialized_init_options();
+  rcl_init_options_init(&init_options, allocator);
+  rcl_init_options_set_domain_id(&init_options, ros_domain);
+  
+  rclc_support_init_with_options(&support, 0, NULL, &init_options, &allocator);
   rclc_node_init_default(&node, "esp32_imu", "", &support);
 
-  // Criar publisher Encoder
+  sensor_msgs__msg__BatteryState__init(&battery_msg);
+
   rclc_publisher_init_default(
     &encoder_pub,
     &node,
     ROSIDL_GET_MSG_TYPE_SUPPORT(nav_msgs, msg, Odometry),
     ODOM_TOPIC);
+
+  rclc_publisher_init_default(
+    &battery_pub,
+    &node,
+    ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, BatteryState),
+    BATTERY_TOPIC);
 
   rclc_subscription_init_default(
     &cmd_vel_sub,
@@ -277,8 +337,10 @@ void setup() {
 
   // Configurar timer e executor || RCL_MS_TO_NS(20) para mudar a frequencia -- 20 = 50Hz
   rclc_timer_init_default2(&timer_watchdog, &support, RCL_MS_TO_NS(WATCHDOG_PUBLISH_RATE), callback_watchdog, true);
-  rclc_executor_init(&executor, &support.context, 2, &allocator);
+  rclc_timer_init_default2(&timer_battery, &support, RCL_MS_TO_NS(BATTERY_PUBLISH_RATE), callback_battery, true);
+  rclc_executor_init(&executor, &support.context, 3, &allocator);
   rclc_executor_add_timer(&executor, &timer_watchdog);
+  rclc_executor_add_timer(&executor, &timer_battery);
   rclc_executor_add_subscription(&executor, &cmd_vel_sub, &cmd_vel_msg, &callback_cmd_vel, ON_NEW_DATA);
 }
 
