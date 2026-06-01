@@ -217,7 +217,7 @@ After=docker.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/docker exec main_zed bash -c "source /opt/ros/humble/setup.bash && source /home/Zed/install/setup.bash && ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i"
+ExecStart=/usr/bin/docker exec main_zed bash -c "source /opt/ros/humble/setup.bash && source /home/Zed/install/setup.bash && export ROS_DOMAIN_ID=77 && ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i"
 Restart=always
 RestartSec=5
 
