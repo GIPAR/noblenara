@@ -110,7 +110,7 @@ After=docker.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/docker exec noblenara bash -c "source /opt/ros/jazzy/setup.bash && source /microros_ws/install/setup.bash && ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/esp_nara -b 115200"
+ExecStart=/usr/bin/docker exec noblenara bash -c "source /opt/ros/jazzy/setup.bash && source /microros_ws/install/setup.bash && ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/esp_nara -b 921600"
 Restart=always
 RestartSec=5
 
