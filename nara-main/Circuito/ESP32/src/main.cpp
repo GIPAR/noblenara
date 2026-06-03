@@ -273,7 +273,7 @@ void callback_watchdog(rcl_timer_t * timer, int64_t last_call_time){
 //                              SETUP
 
 void setup() {
-  Serial.begin(921600); // 921600 Para permitir corretamente todos os dados para serem passados rapidamente
+  Serial.begin(921600); // 460800 Para permitir corretamente todos os dados para serem passados rapidamente
 
   // CONFIGURAÇÕES
   set_microros_serial_transports(Serial);
@@ -338,6 +338,9 @@ void setup() {
   allocator = rcl_get_default_allocator();
   ros_domain = 77;
 
+  rmw_qos_profile_t cmd_vel_qos = rmw_qos_profile_sensor_data;
+  cmd_vel_qos.depth = 1;
+
   init_options = rcl_get_zero_initialized_init_options();
   rcl_init_options_init(&init_options, allocator);
   rcl_init_options_set_domain_id(&init_options, ros_domain);
@@ -400,11 +403,12 @@ void setup() {
     BATTERY_TOPIC
   );
 
-  rclc_subscription_init_default(
+  rclc_subscription_init(
     &cmd_vel_sub,
     &node,
     ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
-    CMD_VEL_TOPIC
+    CMD_VEL_TOPIC,
+    &cmd_vel_qos
   );
 
   // Timer e Executor
