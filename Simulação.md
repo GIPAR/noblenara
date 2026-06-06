@@ -56,7 +56,7 @@ Obs: O .bashrc é um arquivo que roda toda vez que um novo terminal é aberto, p
 
 ### Abrindo o Mundo com a Cadeira
 
-Estes são os comandos básicos para rodar a simulação via terminal, primeiramente rode o mundo:
+Estes são os comandos básicos para rodar a simulação via terminal, primeiramente rode o mundo
 
 ``` shell
 ros2 launch smartwheelchair worldmuseum.launch.py
@@ -65,33 +65,45 @@ ros2 launch smartwheelchair worldmuseum.launch.py
 Em outro terminal inicialize a cadeira
 
 ``` shell
-ros2 launch smartwheelchair noblenara.launch.py robot_codename:=alfa
+ros2 launch smartwheelchair noblenara.launch.py
 ```
-
-Para inicializar múltiplos modelos, rode o mesmo comando em outro terminal modificando 'alfa' para um outro nome qualquer, contudo, tenha certeza que o primeiro modelo não está na área inicial (mova-o com teleop do gazebo ou de outra forma)
 
 ### Inicializando o Slam
 
 Para inicializar o slam de um dos robôs juntamente com o rviz2, simplesmente rode o comando: 
 
 ``` shell
-ros2 launch smartwheelchair slam_rviz.launch.py robot_codename:=alfa # Use slam.launch.py para abrir apenas o slam
+ros2 launch smartwheelchair slam_rviz.launch.py
 ```
-
-O robot_codename deve ser o mesmo do robô desejado, anteriormente inicializado no mundo. Não obstante, podemos inicializar este comando novamente em um terminal alternativo para outro robô
 
 *Caso queira*, o mapa pode ser salvo diretamente pelo slam_toolbox
 
 ``` shell
-ros2 service call /noblenara/alfa/slam_toolbox/save_map slam_toolbox/srv/SaveMap "name: {data: 'my_map'}" # Troque "alfa" pelo codenome do robô selecionado
+ros2 service call /noblenara/alfa/slam_toolbox/save_map slam_toolbox/srv/SaveMap "name: {data: 'my_map'}" # Troque "alfa" pelo codenome do robô especifico
 ```
 
 ### Inicializando a Navegação Autônoma 🗺️
 
-Por fim, a navegação pode ser inicilizada individualmente para cada robô com o seguinte comando:
+Por fim, a navegação pode ser inicilizada com o seguinte comando
 
 ``` shell
-ros2 launch smartwheelchair nav2_launch.py robot_codename:=alfa
+ros2 launch smartwheelchair nav2_launch.py
 ```
 
-No Rviz2 do robô desejado, utilize "2D Goal Pose" para mandar comandos para a cadeira
+No Rviz2, utilize "2D Goal Pose" para mandar comandos para a cadeira
+
+### Múltiplos Robôs
+
+Para inicializar múltiplos robôs, faça os comandos "noblenara.launch.py", "slam_rviz.launch.py" e "nav2_launch.py" novamente, adicionando "robot_codename:=nome_do_robo" no final de cada um. Todos os tres comandos devem possuir o mesmo comando *robot_codename:=* e o mesno nome definido em "nome_do_robo" 
+
+***Atenção:*** Tenha certeza que o primeiro modelo não esteja na área inicial e que os nomes de cada robô sejam diferentes entre si. O nome pode ser definido pela troca da linha "nome_do_robo" do comando robot_codename:=
+
+Exemplo de Código:
+
+``` shell
+ros2 launch smartwheelchair noblenara.launch.py robot_codename:=naranobre
+ros2 launch smartwheelchair slam_rviz.launch.py robot_codename:=naranobre
+ros2 launch smartwheelchair nav2_launch.py robot_codename:=naranobre
+```
+
+Para inicializar mais modelos, faça o mesmo processo anterior, mas, certifique-se de modificar o nome
