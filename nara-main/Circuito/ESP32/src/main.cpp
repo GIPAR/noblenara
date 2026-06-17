@@ -102,35 +102,62 @@ void callback_cmd_vel(const void * msgin){
 }
 
 void callback_motorcontrol(){
-    input_left = newLeft / dt;
+    input_left  = newLeft  / dt;
     input_right = newRight / dt;
-    
-    setpoint_left = targetleftVel;
+    setpoint_left  = targetleftVel;
     setpoint_right = targetrightVel;
 
-    if(pidRight.Compute()){
-      if(output_right >=0){
-        mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A);
-        mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B, output_right);
-        mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B, MCPWM_DUTY_MODE_0);
-      }
-      else{
-        mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B);
-        mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A, fabs(output_right));
-        mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A, MCPWM_DUTY_MODE_0);
-      }
+    pidLeft.Compute();   
+    pidRight.Compute();
+
+    // ====================================================================
+    // ZONA MORTA DINÂMICA INDEPENDENTE (Compensação de Assimetria)
+    
+    float DEADBAND_LEFT = 20.0;  
+    float DEADBAND_RIGHT = 23.5; 
+
+    float final_pwm_left = output_left;
+    float final_pwm_right = output_right;
+
+    // Compensação da Roda Esquerda
+    if (setpoint_left > 0.05 && output_left < DEADBAND_LEFT && output_left > 0) {
+        final_pwm_left = DEADBAND_LEFT;
+    } else if (setpoint_left < -0.05 && output_left > -DEADBAND_LEFT && output_left < 0) {
+        final_pwm_left = -DEADBAND_LEFT;
     }
-    if(pidLeft.Compute()){
-      if(output_left >=0){
-        mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A);
-        mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B, output_left);
-        mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B, MCPWM_DUTY_MODE_0);
-      }
-      else{
-        mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B);
-        mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, fabs(output_left));
-        mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, MCPWM_DUTY_MODE_0);
-      }
+
+    // Compensação da Roda Direita (O motor problemático)
+    if (setpoint_right > 0.05 && output_right < DEADBAND_RIGHT && output_right > 0) {
+        final_pwm_right = DEADBAND_RIGHT;
+    } else if (setpoint_right < -0.05 && output_right > -DEADBAND_RIGHT && output_right < 0) {
+        final_pwm_right = -DEADBAND_RIGHT;
+    }
+
+    // Desliga totalmente se o alvo for zero (Segurança)
+    if (fabs(setpoint_left) < 0.01) final_pwm_left = 0.0;
+    if (fabs(setpoint_right) < 0.01) final_pwm_right = 0.0;
+    // ====================================================================
+
+    // Motor direito (Usando o PWM compensado)
+    if(final_pwm_right >= 0){
+      mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A);
+      mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B, final_pwm_right);
+      mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B, MCPWM_DUTY_MODE_0);
+    } else {
+      mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B);
+      mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A, fabs(final_pwm_right));
+      mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A, MCPWM_DUTY_MODE_0);
+    }
+
+    // Motor esquerdo (Usando o PWM compensado)
+    if(final_pwm_left >= 0){
+      mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A);
+      mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B, final_pwm_left);
+      mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B, MCPWM_DUTY_MODE_0);
+    } else {
+      mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B);
+      mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, fabs(final_pwm_left));
+      mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, MCPWM_DUTY_MODE_0);
     }
 }
 
@@ -138,23 +165,32 @@ void callback_motorcontrol(){
 //                        FUNÇÕES DE CÁLCULO
 
 void callback_encoder(){
-  CountLeft = encoderLeft.getCount();
+  CountLeft  = encoderLeft.getCount();
   CountRight = encoderRight.getCount();
 
-  newLeft = CountLeft * METERS_PER_COUNT;                      //Atualizando as variáveis de armazenamento
-  newRight = CountRight * METERS_PER_COUNT;
+  unsigned long now = millis();
+  dt = (float)(now - timehelper) / 1000.0f;
+  if (dt <= 0.0f) dt = 0.001f;  // guarda contra divisão por zero
+  
+  timehelper = now; // ATUALIZA O TEMPO AQUI, DEPOIS DE CALCULAR O DT!
+  encoderLeft.clearCount();   
+  encoderRight.clearCount();
+
+  // DELTA de distância neste ciclo
+  newLeft   = CountLeft  * METERS_PER_COUNT;
+  newRight  = CountRight * METERS_PER_COUNT;
   newCenter = (newLeft + newRight) / 2.0;
 
-  timestamp = millis();
-  dt = (float)(timestamp - timehelper) / 1000.0f;
-  linearVel = newCenter / dt;
+  // Velocidades reais para o PID (m/s)
+  linearVel  = newCenter / dt;
   angularVel = ((newRight - newLeft) / WHEEL_LR_DISTANCE) / dt;
 
-  theta = theta + ((newRight - newLeft) / WHEEL_LR_DISTANCE);   //Atualizando as variáveis de posição absoluta
+  // Acúmulo de posição para o EKF/SLAM
+  theta = theta + ((newRight - newLeft) / WHEEL_LR_DISTANCE);
   posX = posX + (newCenter * cos(theta));
   posY = posY + (newCenter * sin(theta));
 
-  // Preencher mensagem Odometry
+  // Preencher mensagem
   int64_t ns = rmw_uros_epoch_nanos();
   encoder_msg.header.stamp.sec = (int32_t)(ns / 1000000000LL);
   encoder_msg.header.stamp.nanosec = (uint32_t)(ns % 1000000000LL);
@@ -250,7 +286,7 @@ void callback_watchdog(rcl_timer_t * timer, int64_t last_call_time){
   if (timer == NULL) return;
 
   if (millis() - watchdog_cmdvel >= CMD_TIMEOUT_MS){
-    targetleftVel = 0.0;
+    targetleftVel  = 0.0;
     targetrightVel = 0.0;
     pidLeft.Reset();
     pidRight.Reset();
@@ -258,22 +294,18 @@ void callback_watchdog(rcl_timer_t * timer, int64_t last_call_time){
     mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B);
     mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A);
     mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B);
-  };
+  }
 
   callback_encoder();
   callback_imu();
   callback_motorcontrol();
-  timehelper = millis();
-  encoderLeft.clearCount();
-  encoderRight.clearCount();
 }
-
 
 //==============================================================
 //                              SETUP
 
 void setup() {
-  Serial.begin(921600); // 460800 Para permitir corretamente todos os dados para serem passados rapidamente
+  Serial.begin(921600); // 921600 Para permitir corretamente todos os dados para serem passados rapidamente
 
   // CONFIGURAÇÕES
   set_microros_serial_transports(Serial);
