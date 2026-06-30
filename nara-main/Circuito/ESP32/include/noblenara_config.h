@@ -17,7 +17,7 @@
 //=============================================================================
 // DIMENSÕES DO ROBÔ - [METROS]
 //=============================================================================
-#define WHEEL_DIAMETER 0.336
+#define WHEEL_DIAMETER 0.350
 #define WHEEL_RADIUS (WHEEL_DIAMETER / 2.0)
 #define WHEEL_LR_DISTANCE 0.51
 
