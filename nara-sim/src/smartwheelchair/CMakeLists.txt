@@ -28,7 +28,7 @@ endif()
 
 # Instalar launch mapas e configs
 install(DIRECTORY
-  launch maps config worlds urdf meshes models
+  launch maps config worlds urdf meshes models scripts
   DESTINATION share/${PROJECT_NAME}/
 )
 
@@ -36,9 +36,18 @@ install(DIRECTORY
 # Instalar scripts Python
 install(PROGRAMS
   scripts/teleop_keyboard.py
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 # Instalar módulos Python
 #ament_python_install_package(${PROJECT_NAME})
 #NOTA: ADICIONAR QUANDO FOR NECESSÁRIO
+
+# Força permissão de execução (muito importante)
+install(CODE "
+  execute_process(
+    COMMAND chmod +x \"\${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/teleop_keyboard.py\"
+  )
+")
 
 ament_package()
