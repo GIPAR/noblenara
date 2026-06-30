@@ -110,7 +110,7 @@ After=docker.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/docker exec noblenara bash -c "source /opt/ros/jazzy/setup.bash && source /microros_ws/install/setup.bash && ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/esp_nara -b 115200"
+ExecStart=/usr/bin/docker exec noblenara bash -c "source /opt/ros/jazzy/setup.bash && source /microros_ws/install/setup.bash && ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/esp_nara -b 921600"
 Restart=always
 RestartSec=5
 
@@ -197,7 +197,7 @@ sleep 5
 echo "Iniciando no Docker..."
 docker exec noblenara bash -c \
   'source /opt/ros/jazzy/setup.bash && \
-   python3 /NARA/scripts/tablet_cam_node.py'
+   python3 /noblenara_ws/tablet_cam_node.py'
 ```
 
 ---
@@ -217,7 +217,7 @@ After=docker.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/docker exec main_zed bash -c "source /opt/ros/humble/setup.bash && source /home/Zed/install/setup.bash && ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i"
+ExecStart=/usr/bin/docker exec main_zed bash -c "source /opt/ros/humble/setup.bash && source /home/Zed/install/setup.bash && export ROS_DOMAIN_ID=77 && ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i"
 Restart=always
 RestartSec=5
 

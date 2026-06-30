@@ -46,7 +46,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        slam_launch_node,
         DeclareLaunchArgument('robot_codename', default_value='alfa'),
+        slam_launch_node,
         slam_lifecycle
     ])
