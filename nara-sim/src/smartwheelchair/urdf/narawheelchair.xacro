@@ -186,7 +186,7 @@
 
 <joint name="hokuyo_joint" type="fixed">
   <axis xyz="0 1 0" />
-  <origin xyz="0.59 0.0 0.265" rpy="0 3.14 3.14" />
+  <origin xyz="0.59 0.0 0.065" rpy="0 3.14 3.14" />
   <parent link="base_link"/>
   <child link="hokuyo_link"/>
 </joint>
