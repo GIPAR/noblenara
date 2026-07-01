@@ -41,7 +41,13 @@ current_angular = 0.0
 linear_speed = 1.5
 angular_speed = 0.8
 acceleration_rate = 0.02
-deceleration_rate = 0.08
+deceleration_rate = 0.02
+
+# NOTA: Adicionado esse call para evitar diferenças entre velocidades/acelerações iniciais, na abertura do programa, com o modo 'normal '
+normal_speed = linear_speed;
+normal_angular = angular_speed;
+normal_aceleration = acceleration_rate;
+normal_deceleration = deceleration_rate;
  
 # ==================== TOGGLE DE ACELERAÇÃO/DESACELERAÇÃO ====================
 # Default: DESLIGADO -> resposta linear/instantânea (sem rampa)
@@ -69,7 +75,7 @@ AZUL_NARA = (0, 245, 255)
 VELOCIDADES = {
     "Seguranca": {"linear": 1.0, "angular": 0.4, "accel": 0.01, "decel": 0.01,
                   "cor": AZUL_NARA, "cor_escura": (0, 60, 100), "label": "SEGURANÇA"},
-    "Normal": {"linear": 1.5, "angular": 0.8, "accel": 0.02, "decel": 0.02,
+    "Normal": {"linear": normal_speed, "angular": normal_angular, "accel": normal_aceleration, "decel": normal_deceleration,
                "cor": AZUL_NARA, "cor_escura": (0, 60, 100), "label": "NORMAL"},
     "Rapido": {"linear": 2.0, "angular": 1.2, "accel": 0.02, "decel": 0.02,
                "cor": AZUL_NARA, "cor_escura": (0, 60, 100), "label": "RÁPIDO"},
