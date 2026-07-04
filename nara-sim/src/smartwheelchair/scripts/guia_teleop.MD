@@ -136,7 +136,7 @@ jstest /dev/input/js0
 
 | Campo | Valor |
 |---|---|
-| Versão | 1.2 (NARA Teleop) |
+| Versão | 2.0 (NARA Teleop) |
 | ROS2 | Humble / Iron / Jazzy |
 | Simulador | Gazebo Harmonic |
 | Licença | Uso acadêmico/pessoal — modifique à vontade |

@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'meu_script = meu_pacote.meu_script:main',
+            'teleop_keyboard = smartwheelchair.teleop_keyboard:main',
         ],
     },
 )

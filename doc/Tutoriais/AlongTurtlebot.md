@@ -1,5 +1,7 @@
 # Noblenara e Turtlebot4 (Necessário Completar)
 
+O processo de desenvolvimento para permitir a utilização da NARA + Turtlebot4 está em processo de finalização, alguns comandos precisam de revisão:
+
 Para executarmos os dois robos de serviço no mesmo mundo, primeiro precisamos instalar os pacotes do turtlebot:
 
 ## Pacotes para o Ubuntu 24.04

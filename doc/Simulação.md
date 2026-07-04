@@ -5,7 +5,7 @@ Tutorial de como utilizar a cadeira de rodas autônoma "NARA" em um ambiente vir
 
 1 - O projeto ainda está em desenvolvimento, severas atualizações são esperadas ao longo deste tempo.
 
-2 - Incluiu-se também, [neste arquivo](Container_ROS1.md), um tutorial para o uso do container da simulação da NARA no ROS1
+2 - Incluiu-se também, [neste arquivo](/doc/Tutoriais/Container_ROS1.md), um tutorial para o uso do container da simulação da NARA no ROS1
 
 
 ## 1 - Como utilizar a simulação 📋
@@ -69,6 +69,12 @@ Em outro terminal inicialize a cadeira
 ros2 launch smartwheelchair noblenara.launch.py
 ```
 
+Também podemos inicializar o Teleoperador para controle pelo Teclado ou Joystick (Opcional)
+
+``` shell
+ros2 run smartwheelchair teleop_keyboard.py
+```
+
 ### Inicializando o Slam
 
 Para inicializar o slam de um dos robôs juntamente com o rviz2, simplesmente rode o comando: 
@@ -111,4 +117,4 @@ Para inicializar mais modelos, faça o mesmo processo anterior, mas, certifique-
 
 #### Noblenara e Turtlebot4
 
-A noblenara e o Turtlebot4 podem ser inicializados conjuntamente, para ler o tutorial descritivo sobre todos os processos, [Clique aqui](AlongTurtlebot.md)
+A noblenara e o Turtlebot4 podem ser inicializados conjuntamente, para ler o tutorial descritivo sobre todos os processos, [Clique aqui](/doc/Tutoriais/AlongTurtlebot.md)
