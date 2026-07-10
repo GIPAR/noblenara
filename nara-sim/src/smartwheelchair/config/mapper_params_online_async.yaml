@@ -9,6 +9,7 @@
     ceres_trust_strategy: LEVENBERG_MARQUARDT
     ceres_dogleg_type: TRADITIONAL_DOGLEG
     ceres_loss_function: None
+    scan_queue_size: 1
 
     # --- Tópicos e Frames ---
     odom_frame: odom
