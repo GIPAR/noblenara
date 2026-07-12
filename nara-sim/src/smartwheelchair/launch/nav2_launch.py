@@ -13,6 +13,7 @@ def generate_launch_description():
     pkg_share = get_package_share_directory('smartwheelchair')
     robot_codename = LaunchConfiguration("robot_codename")
     params_file = LaunchConfiguration('params_file')
+    map_file = LaunchConfiguration('map_file')
     
     configured_file = RewrittenYaml(
         source_file=params_file,
@@ -32,6 +33,10 @@ def generate_launch_description():
             "robot_base_frame": ["noblenara/", robot_codename, "/robot_footprint"],
             "odom_frame_id": ["noblenara/", robot_codename, "/odom"],
             "base_frame_id": ["noblenara/", robot_codename, "/robot_footprint"],
+            # Novos rewrites, exigidos pelo amcl
+            "global_frame_id": ["noblenara/", robot_codename, "/map"],
+            "scan_topic": ["/noblenara/", robot_codename, "/scan_filtered"],
+            "map_server.ros__parameters.frame_id": ["noblenara/", robot_codename, "/map"],
         },
         convert_types=True
     )
@@ -41,7 +46,23 @@ def generate_launch_description():
         actions=[
             SetParameter('use_sim_time', True),
             PushROSNamespace(namespace=['/noblenara/', robot_codename]),
-            
+
+            # Publica o mapa salvo no tópico /map, para o AMCL e o costmap global
+            Node(
+                package='nav2_map_server',
+                executable='map_server',
+                output='screen',
+                parameters=[configured_file, {'yaml_filename': map_file}],
+            ),
+
+            # Estima a pose do robô dentro do mapa publicado pelo map_server
+            Node(
+                package='nav2_amcl',
+                executable='amcl',
+                output='screen',
+                parameters=[configured_file],
+            ),
+
             Node(
                 package='nav2_controller',
                 executable='controller_server',
@@ -89,6 +110,8 @@ def generate_launch_description():
                             {'autostart': True},
                             {'use_sim_time': True},
                             {'node_names': [
+                                'map_server',
+                                'amcl',
                                 'controller_server',
                                 'planner_server',
                                 'bt_navigator',
@@ -102,6 +125,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument('robot_codename', default_value='alfa'),
-        DeclareLaunchArgument( 'params_file', default_value=os.path.join(pkg_share, 'config', 'nav2_params.yaml'), description='Caminho completo para o arquivo de parâmetros do Nav2'), # Podemos trocar o arquivo de parâmetros com ros2 launch smartwheelchair params_file:=/some/path.yaml
+        DeclareLaunchArgument( 'params_file', default_value=os.path.join(pkg_share, 'config', 'nav2_params.yaml'), description='Caminho completo para o arquivo de parâmetros do Nav2'), #
+        DeclareLaunchArgument( 'map_file', description='Caminho completo para o .yaml do mapa salvo (gerado pelo map_saver_cli)'),
         Nav2_Nodes,
     ])

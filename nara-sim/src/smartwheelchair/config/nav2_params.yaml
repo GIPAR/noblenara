@@ -1,13 +1,42 @@
 # Arquivo para navegação autônoma para a NARA
 # Use use_sim_time: false para a cadeira física
 
-# amcl:
-#   ros__parameters:
-#     use_sim_time: True
-#     base_frame_id: base_footprint
-#     odom_frame_id: odom
-#     global_frame_id: map
-#     scan_topic: /scan
+# Publicador do mapa estático salvo
+map_server:
+  ros__parameters:
+    use_sim_time: True
+    frame_id: map   
+
+amcl:
+  ros__parameters:
+    use_sim_time: True
+    base_frame_id: robot_footprint     
+    odom_frame_id: odom
+    global_frame_id: map
+    scan_topic: scan_filtered         
+
+    # Começar conservador e reduzir depois de testar na cadeira física.
+    alpha1: 0.2   # ruído rotacional causado por rotação
+    alpha2: 0.2   # ruído rotacional causado por translação
+    alpha3: 0.2   # ruído translacional causado por translação
+    alpha4: 0.2   # ruído translacional causado por rotação
+
+    # mais partículas = melhor cobertura de hipóteses
+    min_particles: 500
+    max_particles: 2000
+
+    recovery_alpha_slow: 0.001   
+    recovery_alpha_fast: 0.1     
+
+    set_initial_pose: true       
+    initial_pose:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      yaw: 0.0
+    update_min_d: 0.15           # distância mínima percorrida para reavaliar a pose
+    update_min_a: 0.15           # rotação mínima para reavaliar a pose
+    transform_tolerance: 0.4     
 
 
 # Cérebro
@@ -34,6 +63,7 @@ global_costmap:
       transform_tolerance: 0.4
 
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+      always_send_full_costmap: true
 
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
@@ -79,6 +109,7 @@ local_costmap:
 
 
       plugins: ["obstacle_layer", "inflation_layer"]
+      always_send_full_costmap: true
 
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
