@@ -27,8 +27,8 @@
 //=============================================================================
 // CONFIGURAÇÕES DO ENCONDER
 //=============================================================================
-#define ENCODER_LEFT_A 32
-#define ENCODER_LEFT_B 33
+#define ENCODER_LEFT_A 33
+#define ENCODER_LEFT_B 32
 #define ENCODER_RIGHT_A 34
 #define ENCODER_RIGHT_B 35
 
@@ -56,7 +56,7 @@
 //=============================================================================
 #define VOLTAGE_RATIO (4.85 * (4.85 / 3.3))
 #define VOLTAGE1_PIN 13
-#define VOLTAGE2_PIN 18
+#define VOLTAGE2_PIN 12
 
 //=============================================================================
 // CONFIGURAÇÕES MICRO-ROS
