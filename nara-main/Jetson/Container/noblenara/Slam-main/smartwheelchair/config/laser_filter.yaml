@@ -1,0 +1,14 @@
+scan_to_scan_filter_chain:
+  ros__parameters:
+    filter1:
+      name: footprint_filter
+      type: laser_filters/LaserScanBoxFilter
+      params:
+        box_frame: robot_footprint
+        min_x: -0.20 # Comprimento
+        max_x: 0.85
+        min_y: -0.35 # Largura
+        max_y: 0.35
+        min_z: -0.1
+        max_z: 1.0
+        invert: false # False = remove o que está DENTRO da caixa
