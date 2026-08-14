@@ -33,7 +33,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/home/jetson-nara/sync_nara_time.sh
+ExecStart=/home/scripts/sync_nara_time.sh
 User=root
 RemainAfterExit=yes
 
@@ -42,12 +42,12 @@ WantedBy=multi-user.target
 ```
 
 ### 📜 Código do Script  
-`/home/jetson-nara/sync_nara_time.sh`
+`/home/scripts/sync_nara_time.sh`
 
 ```bash
 #!/bin/bash
 echo "NARA: Iniciando sincronizacao de tempo..."
-sleep 10
+sleep 5
 
 echo "NARA: Corrigindo DNS..."
 rm -f /etc/resolv.conf
