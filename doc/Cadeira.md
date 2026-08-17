@@ -35,7 +35,7 @@ O projeto do código da ESP32 pode ser encontrado em /nara-main/Circuito/ESP32, 
 
 Vale ressaltar que apenas com estas etapas não é possível utilizar a ESP32 diretamente, neste tipo de código que esta sendo utilizado (micro-ros), ele necessita de um agente que vai intermediar a comunicação entre a ESP32 e a Jetson. Geralmente este agente é preparado em um workspace, contudo, já foi feito todos os processos necessários em um container, que será explicado na próxima etapa
 
-### 3 - Instação dos Containers
+### 3 - Instalação dos Containers
 
 Agora, instalaremos os containers principais que permitem o funcionamento dos diferentes sensores e componentes da cadeira
 
@@ -67,7 +67,7 @@ Agora faremos a construção da imagem dos containers (a "forma" que faz os cont
 docker build -t noblenara_main ./noblenara/nara-main/Jetson/Container/noblenara # Troque "Jetson" pelo nome de Usuário, caso este for diferente
 ```
 
-Por último, criaremos o container a partir da imagem construiída
+Por último, criaremos o container a partir da imagem construida
 
 ``` shell
 docker run --runtime=nvidia -it --privileged --network=host --ipc=host --name=noblenara --pid=host --restart=unless-stopped -v /dev:/dev noblenara_main
@@ -77,6 +77,34 @@ Vale ressaltar que o domínio do ROS2 que está sendo usado pela ESP32 e pelo co
 
 #### 3.3 - Automatizando o Sistema
 
-Três partes são necessárias para automatizar o sistema...
+Três partes são necessárias para automatizar o sistema
 
-Tutorial Em progresso.
+##### Padronizando os nomes dos dispositivos conectados ás portas USB
+
+Primeiramente precisamos padronizar o nome dos dispositivos para o esperado nos códigos equivalentes, para isso, encontre os ids de cada um por meio do seguinte comando
+
+``` shell
+for dev in /dev/serial/by-id/*; do echo -e "\n=== $dev ==="; udevadm info -a -n "$dev" | grep -m 1 'ATTRS{idVendor}'; udevadm info -a -n "$dev" | grep -m 1 'ATTRS{idProduct}'; udevadm info -a -n "$dev" | grep -m 1 'ATTRS{serial}'; done
+```
+
+Identifique o idVendor, idProduct e o serial de cada dispostivo. Conecte apenas um por vez na Jetson para isolá-los, caso necessário. Com o Lidar identificado, rode o seguinte comando, substituindo <VENDOR_ID_LIDAR>, <PRODUCT_ID_LIDAR> e <SERIAL_LIDAR> com os respectivos valores encontrados
+
+``` shell
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="<VENDOR_ID_LIDAR>", ATTRS{idProduct}=="<PRODUCT_ID_LIDAR>", ATTRS{serial}=="<SERIAL_LIDAR>", SYMLINK+="lidar"' | sudo tee /etc/udev/rules.d/99-lidar.rules # Exemplo: ATTRS{serial}=="0001"
+```
+
+Agora faça o mesmo para a esp32
+
+``` shell
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="<VENDOR_ID_ESP32>", ATTRS{idProduct}=="<PRODUCT_ID_ESP32>", ATTRS{serial}=="<SERIAL_ESP32>", SYMLINK+="esp_nara"' | sudo tee /etc/udev/rules.d/99-esp32.rules # Faça o comando "sudo udevadm control --reload-rules && sudo udevadm trigger" para não precisar reiniciar a Jetson para aplicar as modificações
+```
+
+Exemplo de substituição
+
+``` shell
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="0001", SYMLINK+="esp_nara"' | sudo tee /etc/udev/rules.d/99-esp32.rules 
+```
+
+##### Serviços
+
+Em desenvolvimento
