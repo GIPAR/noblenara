@@ -42,7 +42,7 @@ WantedBy=multi-user.target
 ```
 
 ### 📜 Código do Script  
-`/home/scripts/sync_nara_time.sh`
+`/usr/bin/sync_nara_time.sh`
 
 ```bash
 #!/bin/bash
@@ -68,34 +68,8 @@ date -s "Wed Apr 29 12:00:00 -03 2026"
 
 ---
 
-## 2. Contentor Principal (`noblenara-container.service`)
 
-> Mantém a imagem base do projeto em execução. Se este contentor falhar, todo o ecossistema ROS 2 Jazzy cai em cascata.
-
-### 📄 Código do Serviço  
-`/etc/systemd/system/noblenara-container.service`
-
-```ini
-[Unit]
-Description=Container Principal NARA (noblenara)
-Requires=docker.service
-After=docker.service nara-time.service
-
-[Service]
-Type=simple
-TimeoutStartSec=0
-Restart=always
-RestartSec=5
-ExecStart=/usr/bin/docker start -a noblenara
-ExecStop=/usr/bin/docker stop -t 10 noblenara
-
-[Install]
-WantedBy=multi-user.target
-```
-
----
-
-## 3. Agente Micro-ROS (`microros-nara.service`)
+## 2. Agente Micro-ROS (`microros-nara.service`)
 
 > Gere a comunicação série entre a Jetson (ROS 2) e o microcontrolador ESP32 através de hardware físico.
 
@@ -120,7 +94,7 @@ WantedBy=multi-user.target
 
 ---
 
-## 4. Nó de Visão do Tablet (`tablet-nara.service`)
+## 3. Nó de Visão do Tablet (`tablet-nara.service`)
 
 > Responsável por capturar o ecrã do tablet via ADB (*Android Debug Bridge*), canalizá-lo para uma câmara virtual e publicar o fluxo num tópico ROS.
 
@@ -136,7 +110,7 @@ After=docker.service nara-time.service noblenara-container.service
 [Service]
 Type=simple
 KillMode=mixed
-ExecStart=/usr/local/bin/nara-vision.sh
+ExecStart=/usr/bin/nara-vision.sh
 Restart=always
 RestartSec=5
 
@@ -145,7 +119,7 @@ WantedBy=multi-user.target
 ```
 
 ### 📜 Código do Script  
-`/usr/local/bin/nara-vision.sh`
+`/usr/bin/nara-vision.sh`
 
 ```bash
 #!/bin/bash
@@ -202,7 +176,7 @@ docker exec noblenara bash -c \
 
 ---
 
-## 5. Câmera Estereoscópica ZED 2i (`zed2i-nara.service`)
+## 4. Câmera Estereoscópica ZED 2i (`zed2i-nara.service`)
 
 > Este serviço lida com a visão 3D principal. Isola a ZED num ambiente ROS 2 Humble por dependências de pacotes da Stereolabs.
 
