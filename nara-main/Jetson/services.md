@@ -1,29 +1,35 @@
+
 # Serviços do Projeto NARA (Systemd e Scripts)
 
-> Este documento centraliza a configuração dos serviços `systemd` da NVIDIA Jetson responsáveis pela inicialização automática e monitorização do ecossistema NARA. O sistema gere o relógio do hardware, os contentores Docker, a comunicação micro-ROS e a captura de vídeo (tablet e ZED 2i).
+Este documento centraliza a configuração dos serviços systemd da NVIDIA Jetson responsáveis pela inicialização automática e monitorização do ecossistema NARA. O sistema gere o relógio do hardware, a comunicação micro-ROS e a captura de vídeo (tablet e ZED 2i).
 
 ---
 
 ## 🔄 Ordem de Inicialização no Boot
 
-O `systemd` gere as dependências na seguinte ordem:
+O systemd gere as dependências na seguinte ordem:
 
 | Ordem | Serviço | Descrição | Dependências |
-|-------|---------|-----------|-------------|
+|:-----:|---------|-----------|--------------|
 | 1️⃣ | `nara-time.service` | Executa primeiro. Depende da rede para corrigir o relógio. | `network-online.target` |
-| 2️⃣ | `noblenara-container.service` | Aguarda o Docker e o `nara-time.service`. Levanta o ambiente base. | `docker.service`, `nara-time.service` |
-| 3️⃣ | `microros-nara.service` | Aguarda o `noblenara-container.service`. Estabelece a ligação série com o ESP32. | `docker.service`, `noblenara-container.service` |
-| 4️⃣ | `tablet-nara.service` | Aguarda o `noblenara-container.service`. Inicia o processamento de imagem do tablet. | `docker.service`, `noblenara-container.service` |
-| 🔷 | `zed2i-nara.service` | Serviço independente do ecossistema principal. Requer apenas o `docker.service` e o contentor `main_zed` existente. | `docker.service` |
+| 2️⃣ | `microros-nara.service` | Estabelece a ligação série com o ESP32 via Docker. | `docker.service` |
+| 3️⃣ | `tablet-nara.service` | Inicia o processamento de imagem do tablet no ambiente Docker. | `docker.service`, `nara-time.service` |
+| 🔷 | `zed2i-nara.service` | Serviço independente do ecossistema principal. Inicia a visão 3D principal. | `docker.service` |
 
 ---
 
 ## 1. Sincronização de Relógio (`nara-time.service`)
 
-> ⚠️ **Atenção:** Como o RTC (*Real Time Clock*) da placa não possui bateria/está inoperante, o sistema arranca com a data incorreta, o que inviabiliza conexões SSL (HTTPS) e corrompe os *timestamps* do ROS 2. Este serviço força a atualização via rede.
+> ⚠️ **Atenção:** Como o RTC (Real Time Clock) da placa não possui bateria/está inoperante, o sistema arranca com a data incorreta, o que inviabiliza conexões SSL (HTTPS) e corrompe os timestamps do ROS 2. Este serviço força a atualização via rede.
 
-### 📄 Código do Serviço  
-`/etc/systemd/system/nara-time.service`
+### 📦 Dependências
+
+- `network-online.target` (Systemd)
+- Pacote `curl` (Linux)
+
+### 📄 Código do Serviço
+
+**`/etc/systemd/system/nara-time.service`**
 
 ```ini
 [Unit]
@@ -33,7 +39,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/home/scripts/sync_nara_time.sh
+ExecStart=/usr/bin/sync_nara_time.sh
 User=root
 RemainAfterExit=yes
 
@@ -41,8 +47,9 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 ```
 
-### 📜 Código do Script  
-`/usr/bin/sync_nara_time.sh`
+### 📜 Código do Script
+
+**`/usr/bin/sync_nara_time.sh`**
 
 ```bash
 #!/bin/bash
@@ -68,13 +75,18 @@ date -s "Wed Apr 29 12:00:00 -03 2026"
 
 ---
 
-
 ## 2. Agente Micro-ROS (`microros-nara.service`)
 
-> Gere a comunicação série entre a Jetson (ROS 2) e o microcontrolador ESP32 através de hardware físico.
+Gere a comunicação série entre a Jetson (ROS 2) e o microcontrolador ESP32 através de hardware físico.
 
-### 📄 Código do Serviço  
-`/etc/systemd/system/microros-nara.service`
+### 📦 Dependências
+
+- `docker.service` (Systemd)
+- Regra do `udev` configurada para mapear a porta como `/dev/esp_nara`.
+
+### 📄 Código do Serviço
+
+**`/etc/systemd/system/microros-nara.service`**
 
 ```ini
 [Unit]
@@ -96,16 +108,25 @@ WantedBy=multi-user.target
 
 ## 3. Nó de Visão do Tablet (`tablet-nara.service`)
 
-> Responsável por capturar o ecrã do tablet via ADB (*Android Debug Bridge*), canalizá-lo para uma câmara virtual e publicar o fluxo num tópico ROS.
+Captura a câmara do tablet via ADB, canaliza para uma câmara virtual (v4l2loopback) e publica o fluxo num tópico ROS 2 dentro do container Docker.
 
-### 📄 Código do Serviço  
-`/etc/systemd/system/tablet-nara.service`
+> ⚠️ **Pré-requisito no tablet Samsung:** Configurações → Tela → Tempo limite da tela → máximo. Configurações → Opções do desenvolvedor → Manter ativado ("Stay awake") → ativo. Sem isto, o Android derruba a conexão USB quando a tela apaga.
+
+### 📦 Dependências
+
+- `docker.service`, `nara-time.service` (Systemd)
+- Pacotes na Jetson: `adb`, `v4l2loopback-dkms`, `scrcpy` v2.7 (compilado a partir do [repositório oficial](https://github.com/Genymobile/scrcpy))
+- Pacote no container: `ros-jazzy-cv-bridge`
+
+### 📄 Código do Serviço
+
+**`/etc/systemd/system/tablet-nara.service`**
 
 ```ini
 [Unit]
 Description=Nó de Visão do Tablet NARA
-Requires=docker.service noblenara-container.service
-After=docker.service nara-time.service noblenara-container.service
+Requires=docker.service
+After=docker.service nara-time.service
 
 [Service]
 Type=simple
@@ -118,17 +139,24 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-### 📜 Código do Script  
-`/usr/bin/nara-vision.sh`
+### 📜 Código do Script
+
+**`/usr/bin/nara-vision.sh`**
 
 ```bash
 #!/bin/bash
+
+# ===== CONFIGURAÇÃO =====
+ROS_DOMAIN_ID_NARA=77
+# =========================
+
 export SDL_VIDEODRIVER=dummy
 export SDL_RENDER_DRIVER=software
 
 echo "Limpando processos fantasmas..."
 pkill -f "scrcpy.*v4l2-sink" 2>/dev/null
-sleep 1
+docker exec noblenara bash -c "pkill -f tablet_cam_node.py" 2>/dev/null
+sleep 2
 
 if [ -e /dev/video7 ]; then
   echo "Removendo /dev/video7 antigo..."
@@ -138,6 +166,7 @@ fi
 
 echo "Configurando v4l2loopback..."
 modprobe v4l2loopback exclusive_caps=1 video_nr=7 card_label="Tablet_Nara"
+sleep 1
 
 echo "Iniciando scrcpy..."
 scrcpy \
@@ -150,6 +179,7 @@ scrcpy \
   --v4l2-sink=/dev/video7 \
   --no-audio \
   --no-window &
+
 SCRCPY_PID=$!
 
 echo "Aguardando /dev/video7..."
@@ -168,20 +198,28 @@ fi
 
 echo "/dev/video7 pronto! Aguardando stream estabilizar..."
 sleep 5
-echo "Iniciando no Docker..."
-docker exec noblenara bash -c \
+
+echo "Iniciando no Docker (ROS_DOMAIN_ID=${ROS_DOMAIN_ID_NARA})..."
+docker exec -e ROS_DOMAIN_ID="${ROS_DOMAIN_ID_NARA}" noblenara bash -c \
   'source /opt/ros/jazzy/setup.bash && \
-   python3 /noblenara_ws/tablet_cam_node.py'
+   [ -f /noblenara_ws/install/setup.bash ] && source /noblenara_ws/install/setup.bash; \
+   python3 /noblenara_ws/src/smartwheelchair/scripts/tablet_cam_node.py'
 ```
 
 ---
 
 ## 4. Câmera Estereoscópica ZED 2i (`zed2i-nara.service`)
 
-> Este serviço lida com a visão 3D principal. Isola a ZED num ambiente ROS 2 Humble por dependências de pacotes da Stereolabs.
+Este serviço lida com a visão 3D principal. Isola a ZED num ambiente ROS 2 Humble por dependências de pacotes da Stereolabs.
 
-### 📄 Código do Serviço  
-`/etc/systemd/system/zed2i-nara.service`
+### 📦 Dependências
+
+- `docker.service` (Systemd)
+- Contentor `main_zed` criado e existente.
+
+### 📄 Código do Serviço
+
+**`/etc/systemd/system/zed2i-nara.service`**
 
 ```ini
 [Unit]
@@ -209,7 +247,6 @@ sudo systemctl daemon-reload
 
 # Ativar serviços para iniciar no boot
 sudo systemctl enable nara-time.service
-sudo systemctl enable noblenara-container.service
 sudo systemctl enable microros-nara.service
 sudo systemctl enable tablet-nara.service
 sudo systemctl enable zed2i-nara.service
@@ -221,14 +258,13 @@ sudo systemctl restart <nome-do-servico>
 
 # Verificar estado e logs
 sudo systemctl status <nome-do-servico>
-journalctl -u <nome-do-servico> -f  # Follow logs em tempo real
+journalctl -u <nome-do-servico> -f                    # Follow logs em tempo real
 journalctl -u <nome-do-servico> --since "10 minutes ago"  # Logs recentes
 ```
 
----
-
-> 📌 **Nota:** Certifique-se de que os scripts possuem permissão de execução:
+📌 **Nota:** Certifique-se de que os scripts possuem permissão de execução:
+>
 > ```bash
-> chmod +x /home/jetson-nara/sync_nara_time.sh
-> chmod +x /usr/local/bin/nara-vision.sh
+> sudo chmod +x /usr/bin/sync_nara_time.sh
+> sudo chmod +x /usr/bin/nara-vision.sh
 > ```
