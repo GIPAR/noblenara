@@ -1,11 +1,13 @@
 #include <Arduino.h>
 #include <micro_ros_platformio.h>
 #include "noblenara_config.h"
+#include <noblenara_interface/srv/set_pid.h>
 
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
 
+#include <QuickPID.h>
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
@@ -17,8 +19,6 @@
 #include <nav_msgs/msg/odometry.h> 
 #include <geometry_msgs/msg/twist.h>
 #include <sensor_msgs/msg/battery_state.h>
-
-#include <QuickPID.h>
 
 // MicroROS
 rclc_support_t support;
@@ -39,6 +39,11 @@ rcl_timer_t timer_watchdog;
 rcl_publisher_t battery_pub;
 sensor_msgs__msg__BatteryState battery_msg;
 rcl_timer_t timer_battery;
+
+rcl_service_t pid_service;
+const rosidl_service_type_support_t * type_support = ROSIDL_GET_SRV_TYPE_SUPPORT(noblenara_interface, srv, SetPID);
+noblenara_interface__srv__SetPID_Request pid_request_msg;
+noblenara_interface__srv__SetPID_Response pid_response_msg;
 
 // MPU6050
 Adafruit_MPU6050 mpu;
@@ -75,17 +80,22 @@ float input_left, output_left, setpoint_left;
 float input_right, output_right, setpoint_right;
 
 QuickPID pidLeft(&input_left, &output_left, &setpoint_left, 
-                 K_P, K_I, K_D, 
+                 lK_P, lK_I, lK_D, 
                  QuickPID::Action::direct);
                  
 QuickPID pidRight(&input_right, &output_right, &setpoint_right,
-                 K_P, K_I, K_D,
+                 rK_P, rK_I, rK_D,
                  QuickPID::Action::direct);
+
+float lkp_live, lkd_live, lki_live; // Variáveis para Mudança de PID Dinâmicas
+float rkp_live, rkd_live, rki_live;
 
 void callback_watchdog();
 void callback_encoder();
 void callback_imu();
 void callback_battery();
+void service_callback();
+
 
 //=============================================================================
 //                        FUNÇÕES DE CONTROLE DE VELOCIDADE
@@ -160,6 +170,7 @@ void callback_motorcontrol(){
       mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, MCPWM_DUTY_MODE_0);
     }
 }
+
 
 //=============================================================================
 //                        FUNÇÕES DE CÁLCULO
@@ -252,6 +263,7 @@ void callback_imu(){
   }
 }
 
+
 //=============================================================================
 //                        FUNÇÕES AUXILIARES
 void callback_battery(rcl_timer_t * timer, int64_t last_call_time){
@@ -279,6 +291,38 @@ void callback_battery(rcl_timer_t * timer, int64_t last_call_time){
   }
 }
 
+void service_callback(const void * request_msg, void * response_msg){
+  // Cast messages to expected types
+  noblenara_interface__srv__SetPID_Request * req_in = (noblenara_interface__srv__SetPID_Request *) request_msg;
+  noblenara_interface__srv__SetPID_Response * res_in = (noblenara_interface__srv__SetPID_Response *) response_msg;
+
+  if(req_in->select_motor == 0){
+    lkp_live = req_in->kp;
+    lkd_live = req_in->kd;
+    lki_live = req_in->ki;
+    rkp_live = req_in->kp;
+    rkd_live = req_in->kd;
+    rki_live = req_in->ki;
+  }
+  else if(req_in->select_motor == 1){
+    lkp_live = req_in->kp;
+    lkd_live = req_in->kd;
+    lki_live = req_in->ki;
+  }
+  else if(req_in->select_motor == 2){
+    rkp_live = req_in->kp;
+    rkd_live = req_in->kd;
+    rki_live = req_in->ki;
+  }
+
+  pidLeft.SetTunings(lkp_live, lki_live, lkd_live);
+  pidRight.SetTunings(rkp_live, rki_live, rkd_live);
+
+  snprintf(res_in->result.data, res_in->result.capacity, "OK!");
+  res_in->result.size = strlen(res_in->result.data);
+}
+
+
 //=============================================================================
 //                          FUNÇÃO PRINCIPAL
 
@@ -300,6 +344,7 @@ void callback_watchdog(rcl_timer_t * timer, int64_t last_call_time){
   callback_imu();
   callback_motorcontrol();
 }
+
 
 //==============================================================
 //                              SETUP
@@ -358,6 +403,14 @@ void setup() {
   pidRight.SetOutputLimits(-100.0, 100.0);
   pidRight.SetSampleTimeUs(20000);
 
+  lkp_live = lK_P;
+  lkd_live = lK_D;
+  lki_live = lK_I;
+
+  rkp_live = rK_P;
+  rkd_live = rK_D;
+  rki_live = rK_I;
+
   // Battery Control Config
   pinMode(VOLTAGE1_PIN, INPUT);
   pinMode(VOLTAGE2_PIN, INPUT);
@@ -388,8 +441,15 @@ void setup() {
   sensor_msgs__msg__BatteryState__init(&battery_msg);
   nav_msgs__msg__Odometry__init(&encoder_msg);
   sensor_msgs__msg__Imu__init(&imu_msg);
+  noblenara_interface__srv__SetPID_Request__init(&pid_request_msg);
+  noblenara_interface__srv__SetPID_Response__init(&pid_response_msg);
 
   // Setup das Mensagens - Precisa inicializar na ordem correta
+  static char service_buffer[20]; // Ensure this is large enough for your longest message
+  pid_response_msg.result.data = service_buffer;
+  pid_response_msg.result.capacity = sizeof(service_buffer);
+  pid_response_msg.result.size = 0;
+
   encoder_msg.header.frame_id.data = (char *)"odom";
   encoder_msg.header.frame_id.size = strlen("odom");
   encoder_msg.header.frame_id.capacity = encoder_msg.header.frame_id.size + 1;
@@ -409,7 +469,7 @@ void setup() {
   battery_msg.power_supply_health = sensor_msgs__msg__BatteryState__POWER_SUPPLY_HEALTH_GOOD;
   battery_msg.power_supply_technology = sensor_msgs__msg__BatteryState__POWER_SUPPLY_TECHNOLOGY_VRLA;
 
-  static float cell_data[2];                                  //Verificar se estas linhas são necessárias
+  static float cell_data[2];                                  // O microROS não aloca memória para arrays e sequências, portanto é necessário alocá-las
   battery_msg.cell_voltage.data = cell_data;
   battery_msg.cell_voltage.capacity = 2;
   battery_msg.cell_voltage.size = 0;
@@ -443,13 +503,16 @@ void setup() {
     &cmd_vel_qos
   );
 
+  rclc_service_init_default( &pid_service, &node, type_support, SetPID_SERVICE);
+
   // Timer e Executor
   rclc_timer_init_default2(&timer_watchdog, &support, RCL_MS_TO_NS(WATCHDOG_PUBLISH_RATE), callback_watchdog, true);
   rclc_timer_init_default2(&timer_battery, &support, RCL_MS_TO_NS(BATTERY_PUBLISH_RATE), callback_battery, true);
-  rclc_executor_init(&executor, &support.context, 3, &allocator);
+  rclc_executor_init(&executor, &support.context, 4, &allocator);
   rclc_executor_add_timer(&executor, &timer_watchdog);
   rclc_executor_add_timer(&executor, &timer_battery);
   rclc_executor_add_subscription(&executor, &cmd_vel_sub, &cmd_vel_msg, &callback_cmd_vel, ON_NEW_DATA);
+  rclc_executor_add_service(&executor, &pid_service, &pid_request_msg, &pid_response_msg, service_callback);
 }
 
 void loop() {
