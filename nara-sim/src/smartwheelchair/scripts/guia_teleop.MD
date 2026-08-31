@@ -10,7 +10,7 @@ Controlador visual desenvolvido em Python com **Pygame + ROS2** para teleoperaç
 
 **2. Pygame:**
 ```bash
-pip3 install pygame
+sudo apt install python3-pygame
 ```
 
 **3. Pacotes ROS2** (normalmente já instalados):
