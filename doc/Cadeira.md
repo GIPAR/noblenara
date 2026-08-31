@@ -107,4 +107,46 @@ echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS
 
 ##### Serviços
 
-Em desenvolvimento
+Os **serviços** são programas que operam em segundo plano no sistema, sem a necessidade de interação direta do usuário. É possível configurá-los para que sejam iniciados automaticamente junto com o sistema — e é exatamente isso que faremos aqui.
+
+
+> **Observação:** dependendo do serviço, pode ser necessário instalar dependências. Verifique os requisitos específicos de cada serviço antes de prosseguir com a instalação.
+
+##### Como instalar os serviços
+
+Os serviços ficam salvos na pasta **`/etc/systemd/system/`** e possuem extensão **`.service`**. Para criar um novo serviço, siga o passo a passo abaixo:
+
+**1. Criação do arquivo `.service`:**
+
+```shell
+sudo nano /etc/systemd/system/exemplo.service
+```
+
+**2. Criação do script associado (quando necessário):**
+
+Alguns serviços executam scripts salvos em **`/usr/bin/`**. Nesses casos, também é necessário criar o arquivo **`.sh`** correspondente e conceder permissão de execução:
+
+```shell
+sudo nano /usr/bin/exemplo.sh
+sudo chmod +x /usr/bin/exemplo.sh
+```
+
+**3. Recarregar o systemd:**
+
+Após criar os arquivos necessários, é preciso recarregar o systemd para que ele reconheça o novo serviço:
+
+```shell
+sudo systemctl daemon-reload
+```
+
+**4. Habilitar e iniciar o serviço:**
+
+Por fim, basta habilitar e iniciar o serviço:
+
+```shell
+sudo systemctl enable --now exemplo.service
+```
+
+---
+
+📄 Para o conteúdo completo, os comandos e os requisitos de instalação de cada serviço específico, consulte o arquivo [services.md](/nara-main/Jetson/services.md).

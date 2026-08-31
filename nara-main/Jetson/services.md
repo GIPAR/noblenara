@@ -118,6 +118,57 @@ Captura a câmara do tablet via ADB, canaliza para uma câmara virtual (v4l2loop
 - Pacotes na Jetson: `adb`, `v4l2loopback-dkms`, `scrcpy` v2.7 (compilado a partir do [repositório oficial](https://github.com/Genymobile/scrcpy))
 - Pacote no container: `ros-jazzy-cv-bridge`
 
+#### 🔧 Instalação das Dependências
+
+**Dependências de execução:**
+
+```bash
+sudo apt update
+sudo apt install adb v4l2loopback-dkms -y
+```
+
+**Dependências de compilação (só para instalar o scrcpy):**
+
+```bash
+sudo apt install ffmpeg libsdl2-2.0-0 wget \
+  gcc git pkg-config meson ninja-build libsdl2-dev \
+  libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev \
+  libswresample-dev libusb-1.0-0 libusb-1.0-0-dev -y
+```
+
+**Dependência para rodar o nó Python dentro do container:**
+
+```bash
+docker exec -it noblenara bash -c "apt update && apt install -y ros-jazzy-cv-bridge"
+```
+
+**Compilar o scrcpy (versão 2.7 — compatível com o SDL2 da Jetson):**
+
+```bash
+cd ~
+git clone https://github.com/Genymobile/scrcpy
+cd scrcpy
+git checkout v2.7
+./install_release.sh
+```
+
+Confirmação de instalação:
+
+```bash
+scrcpy --version
+```
+
+**Limpar dependências de compilação:**
+
+```bash
+sudo apt remove gcc pkg-config meson ninja-build libsdl2-dev \
+  libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev \
+  libswresample-dev libusb-1.0-0-dev -y
+sudo apt autoremove -y
+cd ~
+rm -rf scrcpy
+```
+
 ### 📄 Código do Serviço
 
 **`/etc/systemd/system/tablet-nara.service`**
@@ -203,7 +254,27 @@ echo "Iniciando no Docker (ROS_DOMAIN_ID=${ROS_DOMAIN_ID_NARA})..."
 docker exec -e ROS_DOMAIN_ID="${ROS_DOMAIN_ID_NARA}" noblenara bash -c \
   'source /opt/ros/jazzy/setup.bash && \
    [ -f /noblenara_ws/install/setup.bash ] && source /noblenara_ws/install/setup.bash; \
-   python3 /noblenara_ws/src/smartwheelchair/scripts/tablet_cam_node.py'
+   python3 /noblenara_ws/src/smartwheelchair/scripts/tablet_cam_node.py' &
+
+NODE_PID=$!
+
+echo "Vigiando conexão do tablet (watchdog)..."
+while true; do
+  # Se o scrcpy morreu (tablet desconectou), aborta tudo e deixa o systemd reiniciar
+  if ! kill -0 "$SCRCPY_PID" 2>/dev/null; then
+    echo "ERRO: scrcpy morreu (tablet desconectado?). Encerrando para reiniciar o ciclo."
+    docker exec noblenara bash -c "pkill -f tablet_cam_node.py" 2>/dev/null
+    kill "$NODE_PID" 2>/dev/null
+    exit 1
+  fi
+  # Se o nó ROS morreu por conta própria, também aborta
+  if ! kill -0 "$NODE_PID" 2>/dev/null; then
+    echo "ERRO: nó ROS encerrou inesperadamente. Encerrando para reiniciar o ciclo."
+    kill "$SCRCPY_PID" 2>/dev/null
+    exit 1
+  fi
+  sleep 3
+done
 ```
 
 ---
