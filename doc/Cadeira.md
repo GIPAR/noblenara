@@ -149,4 +149,4 @@ sudo systemctl enable --now exemplo.service
 
 ---
 
-📄 Para o conteúdo completo, os comandos e os requisitos de instalação de cada serviço específico, consulte o arquivo [services.md](/nara-main/Jetson/services.md).
+📄 Para o conteúdo completo, os comandos e os requisitos de instalação de cada serviço específico, consulte o arquivo [services.md](/doc/Tutoriais/services.md).
