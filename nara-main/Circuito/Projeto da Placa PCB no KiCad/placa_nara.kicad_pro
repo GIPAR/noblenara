@@ -60,12 +60,12 @@
           "hatch_smoothing_level": 0,
           "hatch_smoothing_value": 0.1,
           "hatch_thickness": 1.0,
-          "min_clearance": 0.5,
+          "min_clearance": 1.0,
           "min_island_area": 10.0,
           "min_thickness": 0.25,
           "pad_connection": 1,
-          "remove_islands": 1,
-          "thermal_relief_gap": 0.8,
+          "remove_islands": 0,
+          "thermal_relief_gap": 0.5,
           "thermal_relief_spoke_width": 0.5
         }
       },
@@ -210,7 +210,9 @@
         }
       ],
       "track_widths": [
-        0.0
+        0.0,
+        0.0,
+        1.0
       ],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
@@ -539,7 +541,7 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "",
+      "plot": "../",
       "pos_files": "",
       "specctra_dsn": "",
       "step": "",
@@ -674,7 +676,7 @@
         "uuid": "ba7ada92-9eb5-49e7-af60-32a229d337f9"
       }
     ],
-    "used_designators": "#PWR1,MOTOR_RIGHT1,MOTOR_LEFT1,ENCODER_RIGHT1,ENCODER_LEFT1,J1-2,SENSOR_TENSAO1,JETSON1,U1-3",
+    "used_designators": "U1-3,JETSON1,SENSOR_TENSAO1,J1-2,ENCODER_LEFT1,ENCODER_RIGHT1,MOTOR_LEFT1,MOTOR_RIGHT1,#PWR1",
     "variants": []
   },
   "sheets": [
