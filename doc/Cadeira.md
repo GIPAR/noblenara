@@ -107,46 +107,44 @@ echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS
 
 ##### Serviços
 
-Os **serviços** são programas que operam em segundo plano no sistema, sem a necessidade de interação direta do usuário. É possível configurá-los para que sejam iniciados automaticamente junto com o sistema — e é exatamente isso que faremos aqui.
 
+Os serviços são programas que operam em segundo plano, iniciados automaticamente junto com o sistema. A NARA usa quatro: `nara-time` (corrige o relógio via rede), `microros-nara` (liga a Jetson ao ESP32 via micro-ROS), `tablet-nara` (captura a câmera do tablet via ADB/scrcpy) e `zed2i-nara` (Iniciar visão 3D da ZED 2i).
 
-> **Observação:** dependendo do serviço, pode ser necessário instalar dependências. Verifique os requisitos específicos de cada serviço antes de prosseguir com a instalação.
+Antes de instalar os serviços, instale as dependências:
+```bash
+# Dependências do tablet-nara
+sudo apt install adb v4l2loopback-dkms -y
 
-##### Como instalar os serviços
+# Dependências de build do scrcpy v2.7 (versão da apt é desatualizada)
+sudo apt install ffmpeg libsdl2-2.0-0 wget gcc git pkg-config meson ninja-build \
+  libsdl2-dev libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev \
+  libswresample-dev libusb-1.0-0 libusb-1.0-0-dev -y
 
-Os serviços ficam salvos na pasta **`/etc/systemd/system/`** e possuem extensão **`.service`**. Para criar um novo serviço, siga o passo a passo abaixo:
+cd ~ && git clone https://github.com/Genymobile/scrcpy
+cd scrcpy && git checkout v2.7 && ./install_release.sh
+scrcpy --version   # confirma a instalação
 
-**1. Criação do arquivo `.service`:**
+# Dependência do nó Python dentro do container
+docker exec -it noblenara bash -c "apt update && apt install -y ros-jazzy-cv-bridge"
 
-```shell
-sudo nano /etc/systemd/system/exemplo.service
+# Remove dependências de build, não são mais necessárias
+sudo apt remove gcc pkg-config meson ninja-build libsdl2-dev libavcodec-dev \
+  libavdevice-dev libavformat-dev libavutil-dev libswresample-dev libusb-1.0-0-dev -y
+sudo apt autoremove -y && rm -rf ~/scrcpy
 ```
 
-**2. Criação do script associado (quando necessário):**
+Copie os arquivos da pasta do repositório para a jetson e dê permissões de execução pros scripts.
 
-Alguns serviços executam scripts salvos em **`/usr/bin/`**. Nesses casos, também é necessário criar o arquivo **`.sh`** correspondente e conceder permissão de execução:
-
-```shell
-sudo nano /usr/bin/exemplo.sh
-sudo chmod +x /usr/bin/exemplo.sh
+```bash
+cd ~/noblenara/nara-main/Jetson/Services
+sudo cp *.service /etc/systemd/system/
+sudo cp *.sh /usr/bin/
+sudo chmod +x /usr/bin/sync_nara_time.sh /usr/bin/nara-vision.sh
 ```
-
-**3. Recarregar o systemd:**
-
-Após criar os arquivos necessários, é preciso recarregar o systemd para que ele reconheça o novo serviço:
-
-```shell
+Recarregue o systemd e habilita todos os serviços no boot
+```bash
 sudo systemctl daemon-reload
+sudo systemctl enable --now nara-time.service microros-nara.service tablet-nara.service zed2i-nara.service
 ```
 
-**4. Habilitar e iniciar o serviço:**
-
-Por fim, basta habilitar e iniciar o serviço:
-
-```shell
-sudo systemctl enable --now exemplo.service
-```
-
----
-
-📄 Para o conteúdo completo, os comandos e os requisitos de instalação de cada serviço específico, consulte o arquivo [services.md](/doc/Tutoriais/services.md).
+Para mais informações sobre os serviços e seus conteúdos acesse [services.md](/doc/Tutoriais/services.md).

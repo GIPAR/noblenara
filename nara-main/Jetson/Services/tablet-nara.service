@@ -1,0 +1,14 @@
+[Unit]
+Description=Nó de Visão do Tablet NARA
+Requires=docker.service
+After=docker.service nara-time.service
+
+[Service]
+Type=simple
+KillMode=mixed
+ExecStart=/usr/bin/nara-vision.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
