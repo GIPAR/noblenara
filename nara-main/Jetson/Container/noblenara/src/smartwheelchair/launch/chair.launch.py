@@ -28,7 +28,7 @@ def generate_launch_description():
         executable='sllidar_node',
         name='sllidar_node',
         parameters=[
-            {'serial_port': '/dev/ttyUSB1'},
+            {'serial_port': 'lidar'},
             {'frame_id': 'hokuyo_link'},
             {'serial_baudrate': 256000},
             {'angle_compensate': True}
