@@ -141,7 +141,7 @@ sudo cp *.service /etc/systemd/system/
 sudo cp *.sh /usr/bin/
 sudo chmod +x /usr/bin/sync_nara_time.sh /usr/bin/nara-vision.sh
 ```
-Recarregue o systemd e habilita todos os serviços no boot
+Recarregue o systemd e habilite todos os serviços no boot
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now nara-time.service microros-nara.service tablet-nara.service zed2i-nara.service
