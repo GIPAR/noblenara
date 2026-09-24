@@ -20,7 +20,7 @@ Inicialmente, é necessário atualizar o sistema operacional da Jetson, que é o
 
 ### 2 - Circuito Elétrico
 
-Segundamente, precisamos preparar a parte elétrica, contudo, vale ressaltar que quando trabalhamos com o ROS2 não ha suporte oficial para Arduino, não sendo recomendado utilizá-lo devido ás suas limitações inerentes, por isso, utiliza-se a ESP32 que possui suporte oficial, especificamente por meio de uma biblioteca chamada micro-ros. Para o nosos projeto, O micro-controlador é responsável por controlar o motor (via Ponte-H) e ler as informações dos encoders e do imu, sendo essencial para o nosso robô
+Segundamente, precisamos preparar a parte elétrica, contudo, vale ressaltar que quando trabalhamos com o ROS2 não ha suporte oficial para Arduino, não sendo recomendado utilizá-lo devido ás suas limitações inerentes, por isso, utiliza-se a ESP32 que possui suporte oficial, especificamente por meio de uma biblioteca chamada micro-ros. Para o nosso projeto, O micro-controlador é responsável por controlar o motor (via Ponte-H) e ler as informações dos encoders e do imu, sendo essencial para o nosso robô
 
 Esta preparação é dividida em duas etapas:
 
@@ -31,17 +31,19 @@ Esta preparação é dividida em duas etapas:
 
 #### 2.2 - Reescrever o Código da ESP32
 
-O projeto do código da ESP32 pode ser encontrado em /nara-main/Circuito/ESP32, esta pasta pode ser aberta utilizando a extensão do Platform.io no vscode, ao qual, pode ser feito upload para o microcontrolador via micro-usb<->usb. [Neste link](https://docs.platformio.org/en/latest/integration/ide/vscode.html) há um tutorial básico de setup inicial do platform.io, contudo, em vez de criar um novo projeto, abra o arquivo da ESP32 existente. Para isso, com a extensão instalada, clicke na figura do platform.io na barra lateral do editor (a figura de uma formiga) e selecione a opção "Pick a folder", podendo fazer o build e upload por intermedio das opções ofericidas na barra inferior esquerda
+O projeto do código da ESP32 pode ser encontrado em /nara-main/Circuito/ESP32, que pode ser aberta pela extensão do Platform.io do vscode. Para isso, com ela instalada, basta selecionar a figura da referida extensão na barra lateral do editor (Uma formiga), selecionando a opção "Pick a folder" ("Selecione uma pasta" em português). Por fim, o código pode ser enviado para a esp32 via micro-usb<->usb, selecionando o ícone de upload na barra inferior esquerda do editor (uma seta pra a direita). Adicionalmente, caso queira um tutorial mais aprofundado, [acesse este Link](https://docs.platformio.org/en/latest/integration/ide/vscode.html) das documentações oficiais da Platform.io
 
-Vale ressaltar que apenas com estas etapas não é possível utilizar a ESP32 diretamente, neste tipo de código que esta sendo utilizado (micro-ros), ele necessita de um agente que vai intermediar a comunicação entre a ESP32 e a Jetson. Geralmente este agente é preparado em um workspace, contudo, já foi feito todos os processos necessários em um container, que será explicado na próxima etapa
+Vale ressaltar que apenas com estas etapas não é possível utilizar a ESP32 diretamente. Neste tipo de código que esta sendo utilizado (micro-ros), ele necessita de um agente que vai intermediar a comunicação entre a ESP32 e a Jetson. Neste projeto, esse agente será preparado nos passos a seguir por meio de um *container*
 
 ### 3 - Instalação dos Containers
 
-Agora, instalaremos os containers principais que permitem o funcionamento dos diferentes sensores e componentes da cadeira
+Um container é um pacote que inclúi todas as dependências necessárias para rodar uma aplicação. Ele é preparado por meio da plataforma denominada [Docker](https://docs.docker.com/get-started/get-docker/), sendo recomendado o seu entendimento antes de prosseguir com os próximos passos
+
+O projeto utiliza de containers para conter todas as dependências, pacotes, códigos e funcionalidades principais, permitindo a replicação de forma eficiente e prática. A seguir, instalaremos os principais containers, responsáveis por permitir o funcionamento dos pacotes da cadeira
 
 #### 3.1 - Instalação do Docker
 
-Para utilizarmos os containers, precisamos baixar o administrador que vai instalar, ministrar e organizar os nossos containers, denominado docker. Para isso, conecte-se na **Jetson** remotamente (ssh) ou diretamente (teclado, mouse e monitor) e abra o terminal, rodando o seguinte comando:
+Para essa instalação, é necessário instalar o ***Docker***, que tem o papel essencial de instalar, administrar e organizar os nossos containers. Para isso, conecte-se na **Jetson** remotamente (via ssh) ou diretamente (teclado, mouse e monitor), abrindo o terminal e rodando o seguinte comando:
 
 ``` shell
 sudo apt install docker.io
@@ -61,7 +63,7 @@ Ainda no terminal da Jetson, baixe o repositório com git clone
 git clone https://github.com/GIPAR/noblenara/ 
 ```
 
-Agora faremos a construção da imagem dos containers (a "forma" que faz os containers tomarem um formato específico)
+Agora faremos a construção da imagem dos containers (a "base" para a criação dos containers)
 
 ``` shell
 docker build -t noblenara_main ./noblenara/nara-main/Jetson/Container/noblenara # Troque "Jetson" pelo nome de Usuário, caso este for diferente
@@ -77,11 +79,11 @@ Vale ressaltar que o domínio do ROS2 que está sendo usado pela ESP32 e pelo co
 
 #### 3.3 - Automatizando o Sistema
 
-Três partes são necessárias para automatizar o sistema
+Três partes são necessárias para automatizar todo o sistema
 
 ##### Padronizando os nomes dos dispositivos conectados ás portas USB
 
-Primeiramente precisamos padronizar o nome dos dispositivos para o esperado nos códigos equivalentes, para isso, encontre os ids de cada um por meio do seguinte comando
+Primeiramente, vale comentar que os códigos e pacotes da NARA esperam que os dispostivos externos — como o Lidar e o microcontrolador — tenham uma nomeação específica de identificação. Normalmente eles possuem nomes diversos de acordo com o vendedor e o produto, portanto, devemos manualmente nomeá-los de acordo com o esperado. Para essa finalidade, no terminal da ***Jetson***, encontre os ids da ESP e do Lidar por meio do seguinte comando
 
 ``` shell
 for dev in /dev/serial/by-id/*; do echo -e "\n=== $dev ==="; udevadm info -a -n "$dev" | grep -m 1 'ATTRS{idVendor}'; udevadm info -a -n "$dev" | grep -m 1 'ATTRS{idProduct}'; udevadm info -a -n "$dev" | grep -m 1 'ATTRS{serial}'; done
@@ -107,10 +109,10 @@ echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS
 
 ##### Serviços
 
-
 Os serviços são programas que operam em segundo plano, iniciados automaticamente junto com o sistema. A NARA usa quatro: `nara-time` (corrige o relógio via rede), `microros-nara` (liga a Jetson ao ESP32 via micro-ROS), `tablet-nara` (captura a câmera do tablet via ADB/scrcpy) e `zed2i-nara` (Iniciar visão 3D da ZED 2i).
 
 Antes de instalar os serviços, instale as dependências:
+
 ```bash
 # Dependências do tablet-nara
 sudo apt install adb v4l2loopback-dkms -y
@@ -133,7 +135,7 @@ sudo apt remove gcc pkg-config meson ninja-build libsdl2-dev libavcodec-dev \
 sudo apt autoremove -y && rm -rf ~/scrcpy
 ```
 
-Copie os arquivos da pasta do repositório para a jetson e dê permissões de execução pros scripts.
+Copie os arquivos da pasta do repositório para a jetson e dê permissões de execução para os scripts.
 
 ```bash
 cd ~/noblenara/nara-main/Jetson/Services
@@ -141,7 +143,9 @@ sudo cp *.service /etc/systemd/system/
 sudo cp *.sh /usr/bin/
 sudo chmod +x /usr/bin/sync_nara_time.sh /usr/bin/nara-vision.sh
 ```
+
 Recarregue o systemd e habilite todos os serviços no boot
+
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now nara-time.service microros-nara.service tablet-nara.service zed2i-nara.service
