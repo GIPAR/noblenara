@@ -438,6 +438,18 @@ void setup() {
   rclc_support_init_with_options(&support, 0, NULL, &init_options, &allocator);
   rclc_node_init_default(&node, "esp32_imu", "", &support);
 
+  const int MAX_SYNC_ATTEMPTS = 10;
+  bool time_synced = false;
+ 
+  for (int attempt = 1; attempt <= MAX_SYNC_ATTEMPTS && !time_synced; attempt++) {
+    rmw_uros_sync_session(1000);   // timeout de 1s por tentativa
+    time_synced = rmw_uros_epoch_synchronized();
+ 
+    if (!time_synced) {
+      delay(500);   // espera meio segundo antes de tentar de novo
+    }
+  }
+ 
   sensor_msgs__msg__BatteryState__init(&battery_msg);
   nav_msgs__msg__Odometry__init(&encoder_msg);
   sensor_msgs__msg__Imu__init(&imu_msg);
