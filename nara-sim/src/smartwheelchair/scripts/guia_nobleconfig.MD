@@ -13,9 +13,8 @@ pacote** no seu computador (não é uma cópia virtual):
 
 | Arquivo editado | O que ele muda |
 |---|---|
-| `src/smartwheelchair/urdf/narawheelchair.gazebo` | LIDAR (samples, taxa, alcance), câmeras ZED2i e `camera_user` (resolução/rate), remoção de sensores |
-| `src/smartwheelchair/urdf/narawheelchair.xacro` | Qualidade de malhas/modelos (LEVE/MÉDIO/PESADO) |
-| `src/smartwheelchair/launch/noblenara.launch.py` | Carga do mundo (museum_light/default/finder) e flags SLAM/Nav2 |
+| `src/smartwheelchair/urdf/narawheelchair.gazebo` | LIDAR (samples, taxa, alcance), câmeras ZED2i e `camera_user` (resolução/rate), remoção de sensores no nível LEVE e taxa dos plugins DiffDrive/JointState pelo nível URDF (10/20/30 Hz) |
+| `src/smartwheelchair/launch/worldmuseum.launch.py` e `worldmuseum_finder.launch.py` | Mundo padrão (`museum_light` / `museum_default` / `museum_finder`) via card MUNDO |
 | `src/smartwheelchair/config/nav2_params.yaml` | Partículas do AMCL e `batch_size` do MPPI |
 
 - Antes de mexer, ele salva os originais em
@@ -97,6 +96,8 @@ Ou seja:
       "urdf/narawheelchair.gazebo",
       "urdf/narawheelchair.xacro",
       "launch/noblenara.launch.py",
+      "launch/worldmuseum.launch.py",
+      "launch/worldmuseum_finder.launch.py",
       "config/nav2_params.yaml",
   ]
   ```
@@ -140,6 +141,8 @@ ros2 launch smartwheelchair noble_config.launch.py
 ## 5. Como funciona (resumo)
 
 1. **Iniciante** — 3 cards (`URDF`, `SENSORES`, `MUNDO`) com LEVE/MÉDIO/PESADO.
+   `URDF` ajusta a taxa dos plugins (odom/juntas) em 10/20/30 Hz, `SENSORES`
+   mexe em câmeras/LIDAR e `MUNDO` troca o mundo padrão dos launches de mundo.
    Abaixo, cartões informativos explicam o que muda em cada nível.
 2. **Desenvolvedor** — grade granular 3x3: LIDAR SAMPLES / LIDAR RATE /
    ZED2i / CAM USUÁRIO / CAM USUÁRIO RATE / AMCL PARTÍCULAS / MUNDO /
@@ -165,7 +168,8 @@ launch/noble_config.launch.py         <- launch único que abre o dashboard
 | Sintoma | Causa / solução |
 |---|---|
 | "import psutil/pygame não encontrado" | instalar: `sudo apt install python3-pygame python3-psutil` |
-| Muda no dashboard mas o Gazebo não muda | compilar com `colcon build --symlink-install` e reiniciar a simulação |
+| Muda no dashboard mas o Gazebo não muda | compilar com `colcon build --symlink-install` e reiniciar a simulação (sem symlink é preciso rebuild após cada mudança) |
+| `iniciar_simulacao.sh` com erro de launch não encontrado | regenere clicando em qualquer card (versões antigas geravam nomes com typo `.launpy`) |
 | Não acha `urdf/narawheelchair.gazebo` | conferir a estrutura `.../src/smartwheelchair/...` (seção 3) |
 | Botão RESTAURAR não restaura | a pasta `.backup_configurador/` foi apagada; excluir e reaplicar um card gera backup novo |
 | Interface não abre (sem display) | dashboard é gráfico; requer ambiente com tela (ou `export SDL_VIDEODRIVER=dummy` só p/ teste) |
@@ -173,4 +177,3 @@ launch/noble_config.launch.py         <- launch único que abre o dashboard
 ---
 
 *Parte do projeto NOBLE — dashboard mantido dentro do pacote `smartwheelchair`.*
-*Ainda em Desenvolvimento e Testes, não foi totalmente validado!*
