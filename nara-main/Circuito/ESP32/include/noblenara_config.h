@@ -47,9 +47,13 @@
 #define MOTOR_RIGHT_LPWM 27
 #define MOTOR_RIGHT_RPWM 14
 
-#define K_P 30.0  // P
-#define K_I 0.0   // I
-#define K_D 0.3   // D
+#define lK_P 30.0  // P Left
+#define lK_I 0.0   // I
+#define lK_D 0.3   // D
+
+#define rK_P 30.0  // P Right
+#define rK_I 0.0   // I
+#define rK_D 0.3   // D
 
 //=============================================================================
 // CONFIGURAÇÕES DA BATERIA
@@ -68,11 +72,14 @@
 #define WATCHDOG_PUBLISH_RATE 20
 #define BATTERY_PUBLISH_RATE 1000
 
-// ROS Topic names
+// ROS2 Topic Names
 #define ODOM_TOPIC "/noblenara/odom"
 #define IMU_TOPIC "/noblenara/imu/data"
 #define CMD_VEL_TOPIC "/noblenara/cmd_vel"
 #define BATTERY_TOPIC "/noblenara/battery_status"
+
+// ROS2 Service Names
+#define SetPID_SERVICE "/noblenara/set_pid"
 
 // Timeout do Robô
 #define CMD_TIMEOUT_MS 500

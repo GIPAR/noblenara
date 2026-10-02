@@ -44,18 +44,19 @@ COPY tablet_cam_node.py .
 
 RUN chmod +x tablet_cam_node.py
 
-RUN source /opt/ros/jazzy/setup.bash && \
-    colcon build --symlink-install
-
-# Instala o OpenCV para o tablet_cam_node.py
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        python3-opencv && \
+    rosdep install --from-paths src --ignore-src -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Dependências do Projeto
-RUN apt-get update && apt-get install -y ros-jazzy-xacro ros-jazzy-laser-filters ros-jazzy-robot-state-publisher ros-jazzy-slam-toolbox && \
+RUN source /opt/ros/jazzy/setup.bash && \
+    colcon build --symlink-install
+
+# Instala o OpenCV para o tablet_cam_node.py (não é dependência de um
+# pacote ROS, por isso fica fora do rosdep)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        python3-opencv && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

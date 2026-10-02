@@ -1,0 +1,13 @@
+[Unit]
+Description=Sincronizacao de Hora do Projeto NARA
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sync_nara_time.sh
+User=root
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
