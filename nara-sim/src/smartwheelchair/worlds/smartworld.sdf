@@ -1,0 +1,538 @@
+<?xml version="1.0"?>
+<sdf version='1.9'>
+  <world name='default'>
+
+    <!-- ========== PLUGINS OBRIGATORIOS DO GAZEBO HARMONIC ========== -->
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics"/>
+
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands"/>
+
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster"/>
+
+    <!-- CRITICO: sem esse plugin o lidar nao publica nada -->
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <!-- ========== LUZ ========== -->
+    <light name='sun' type='directional'>
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 -0 0</pose>
+      <diffuse>1.0 1.0 1.0 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- ========== CHAO ========== -->
+    <model name='ground_plane'>
+      <pose>0 0 0 0 0 0</pose>
+      <static>1</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <surface>
+            <contact>
+              <collide_bitmask>65535</collide_bitmask>
+            </contact>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>50</mu2>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <cast_shadows>0</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.6 0.6 0.6 1</ambient>
+            <diffuse>0.6 0.6 0.6 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ========== FISICA OTIMIZADA ========== -->
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type='adiabatic'/>
+    <physics name='default_physics' default='0' type='ode'>
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>250</real_time_update_rate>
+    </physics>
+
+    <!-- ========== CENA ========== -->
+    <scene>
+      <grid>false</grid>
+      <ambient>0.8 0.8 0.8 1</ambient>
+      <background>0.9 0.9 0.9 1</background>
+      <shadows>false</shadows>
+    </scene>
+
+    <audio>
+      <device>default</device>
+    </audio>
+    <wind/>
+
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>0</latitude_deg>
+      <longitude_deg>0</longitude_deg>
+      <elevation>0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+
+    <!-- Mundo para integracao com ambientes inteligentes:
+         Lobby + corredor + 4 salas, sem pessoas e sem checkpoints.
+         Vaos de porta de 2m preparados para porta automatica futura. -->
+    <model name='corridor_rooms'>
+      <static>true</static>
+      <link name="link">
+      <collision name="floor_col">
+        <pose>7.0 0 0.01 0 0 0</pose>
+        <geometry><box><size>34.0 24.0 0.02</size></box></geometry>
+      </collision>
+      <visual name="floor_vis">
+        <pose>7.0 0 0.01 0 0 0</pose>
+        <geometry><box><size>34.0 24.0 0.02</size></box></geometry>
+        <material>
+          <ambient>0.55 0.55 0.55 1</ambient>
+          <diffuse>0.55 0.55 0.55 1</diffuse>
+        </material>
+      </visual>
+      <collision name="lobby_north_col">
+        <pose>-4.0 4.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>8.0 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="lobby_north_vis">
+        <pose>-4.0 4.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>8.0 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="lobby_south_col">
+        <pose>-4.0 -4.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>8.0 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="lobby_south_vis">
+        <pose>-4.0 -4.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>8.0 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="lobby_west_a_col">
+        <pose>-8.0 2.5 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 3.0 2.5</size></box></geometry>
+      </collision>
+      <visual name="lobby_west_a_vis">
+        <pose>-8.0 2.5 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 3.0 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="lobby_west_b_col">
+        <pose>-8.0 -2.5 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 3.0 2.5</size></box></geometry>
+      </collision>
+      <visual name="lobby_west_b_vis">
+        <pose>-8.0 -2.5 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 3.0 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+            <collision name="lobby_west_entrance_col">
+        <pose>-8.0 0.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 2.0 2.5</size></box></geometry>
+      </collision>
+      <visual name="lobby_west_entrance_vis">
+        <pose>-8.0 0.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 2.0 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="lobby_east_a_col">
+        <pose>0.0 3.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 2.0 2.5</size></box></geometry>
+      </collision>
+      <visual name="lobby_east_a_vis">
+        <pose>0.0 3.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 2.0 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="lobby_east_b_col">
+        <pose>0.0 -3.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 2.0 2.5</size></box></geometry>
+      </collision>
+      <visual name="lobby_east_b_vis">
+        <pose>0.0 -3.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 2.0 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="corridor_north_0_col">
+        <pose>5.0 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>10.0 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="corridor_north_0_vis">
+        <pose>5.0 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>10.0 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="corridor_north_1_col">
+        <pose>14.5 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="corridor_north_1_vis">
+        <pose>14.5 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="corridor_north_2_col">
+        <pose>20.5 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>3.0 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="corridor_north_2_vis">
+        <pose>20.5 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>3.0 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="corridor_south_0_col">
+        <pose>5.0 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>10.0 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="corridor_south_0_vis">
+        <pose>5.0 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>10.0 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="corridor_south_1_col">
+        <pose>14.5 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="corridor_south_1_vis">
+        <pose>14.5 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="corridor_south_2_col">
+        <pose>20.5 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>3.0 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="corridor_south_2_vis">
+        <pose>20.5 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>3.0 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="corridor_east_end_col">
+        <pose>22.0 0.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 4.0 2.5</size></box></geometry>
+      </collision>
+      <visual name="corridor_east_end_vis">
+        <pose>22.0 0.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 4.0 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_A_doorwall_a_col">
+        <pose>9.25 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_A_doorwall_a_vis">
+        <pose>9.25 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_A_doorwall_b_col">
+        <pose>12.75 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_A_doorwall_b_vis">
+        <pose>12.75 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_A_backwall_col">
+        <pose>11.0 10.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_A_backwall_vis">
+        <pose>11.0 10.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_A_sidewall_1_col">
+        <pose>8.5 6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_A_sidewall_1_vis">
+        <pose>8.5 6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_A_sidewall_2_col">
+        <pose>13.5 6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_A_sidewall_2_vis">
+        <pose>13.5 6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_B_doorwall_a_col">
+        <pose>9.25 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_B_doorwall_a_vis">
+        <pose>9.25 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_B_doorwall_b_col">
+        <pose>12.75 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_B_doorwall_b_vis">
+        <pose>12.75 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_B_backwall_col">
+        <pose>11.0 -10.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_B_backwall_vis">
+        <pose>11.0 -10.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_B_sidewall_1_col">
+        <pose>8.5 -6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_B_sidewall_1_vis">
+        <pose>8.5 -6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_B_sidewall_2_col">
+        <pose>13.5 -6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_B_sidewall_2_vis">
+        <pose>13.5 -6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_C_doorwall_a_col">
+        <pose>16.25 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_C_doorwall_a_vis">
+        <pose>16.25 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_C_doorwall_b_col">
+        <pose>19.75 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_C_doorwall_b_vis">
+        <pose>19.75 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_C_backwall_col">
+        <pose>18.0 10.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_C_backwall_vis">
+        <pose>18.0 10.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_C_sidewall_1_col">
+        <pose>15.5 6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_C_sidewall_1_vis">
+        <pose>15.5 6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_C_sidewall_2_col">
+        <pose>20.5 6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_C_sidewall_2_vis">
+        <pose>20.5 6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_D_doorwall_a_col">
+        <pose>16.25 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_D_doorwall_a_vis">
+        <pose>16.25 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_D_doorwall_b_col">
+        <pose>19.75 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_D_doorwall_b_vis">
+        <pose>19.75 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_D_backwall_col">
+        <pose>18.0 -10.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_D_backwall_vis">
+        <pose>18.0 -10.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_D_sidewall_1_col">
+        <pose>15.5 -6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_D_sidewall_1_vis">
+        <pose>15.5 -6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="room_D_sidewall_2_col">
+        <pose>20.5 -6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+      </collision>
+      <visual name="room_D_sidewall_2_vis">
+        <pose>20.5 -6.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>0.2 8.0 2.5</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <visual name="plate_A_vis">
+        <pose>11.0 9.89 1.375 1.5708 0 0.0</pose>
+        <geometry><plane><size>3.25 1.0</size></plane></geometry>
+        <material>
+          <ambient>0.1 0.45 1 1</ambient>
+          <diffuse>0.1 0.45 1 1</diffuse>
+        </material>
+      </visual>
+      <visual name="plate_B_vis">
+        <pose>11.0 -9.89 1.375 1.5708 0 3.14159265</pose>
+        <geometry><plane><size>3.25 1.0</size></plane></geometry>
+        <material>
+          <ambient>0.1 0.75 0.3 1</ambient>
+          <diffuse>0.1 0.75 0.3 1</diffuse>
+        </material>
+      </visual>
+      <visual name="plate_C_vis">
+        <pose>18.0 9.89 1.375 1.5708 0 0.0</pose>
+        <geometry><plane><size>3.25 1.0</size></plane></geometry>
+        <material>
+          <ambient>1 0.55 0.1 1</ambient>
+          <diffuse>1 0.55 0.1 1</diffuse>
+        </material>
+      </visual>
+      <visual name="plate_D_vis">
+        <pose>18.0 -9.89 1.375 1.5708 0 3.14159265</pose>
+        <geometry><plane><size>3.25 1.0</size></plane></geometry>
+        <material>
+          <ambient>1 0.15 0.55 1</ambient>
+          <diffuse>1 0.15 0.55 1</diffuse>
+        </material>
+      </visual></link>
+    </model>
+
+    <!-- ===== TAPETES (só visual, sem colisão; topo em z=0.032, abaixo do LiDAR) ===== -->
+    <model name='carpet_a'>
+      <static>true</static>
+      <link name='link'>
+        <visual name='vis'>
+          <pose>11 1.2 0.026 0 0 0</pose>
+          <geometry><box><size>2.0 1.2 0.012</size></box></geometry>
+          <material>
+            <ambient>0.08 0.35 0.85 1</ambient>
+            <diffuse>0.08 0.35 0.85 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='carpet_b'>
+      <static>true</static>
+      <link name='link'>
+        <visual name='vis'>
+          <pose>11 -1.2 0.026 0 0 0</pose>
+          <geometry><box><size>2.0 1.2 0.012</size></box></geometry>
+          <material>
+            <ambient>0.08 0.6 0.25 1</ambient>
+            <diffuse>0.08 0.6 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='carpet_c'>
+      <static>true</static>
+      <link name='link'>
+        <visual name='vis'>
+          <pose>18 1.2 0.026 0 0 0</pose>
+          <geometry><box><size>2.0 1.2 0.012</size></box></geometry>
+          <material>
+            <ambient>0.85 0.45 0.08 1</ambient>
+            <diffuse>0.85 0.45 0.08 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='carpet_d'>
+      <static>true</static>
+      <link name='link'>
+        <visual name='vis'>
+          <pose>18 -1.2 0.026 0 0 0</pose>
+          <geometry><box><size>2.0 1.2 0.012</size></box></geometry>
+          <material>
+            <ambient>0.85 0.12 0.45 1</ambient>
+            <diffuse>0.85 0.12 0.45 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===== BASE/HOME (spawn do camaro) =====
+         O disco verde/anel branco foram REMOVIDOS: ficavam na altura do
+         LiDAR (z=0.06) e geravam um anel de obstaculos falsos em volta do
+         robo no costmap, travando a navegacao. O spawn continua em
+         (x=-4.0, y=0) no meio do lobby definido no gazebo.launch.py. -->
+
+    <!-- ========== CAMERA INICIAL ========== -->
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>10 -18 14 0 0.6 1.57</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
+    </gui>
+
+  </world>
+</sdf>
