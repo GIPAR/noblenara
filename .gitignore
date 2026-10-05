@@ -17,5 +17,9 @@ Thumbs.db
 *.swp
 *.swo
 
+# Arquivos do Dashboard
+.backup_configurador/  
+iniciar_simulacao.sh
+
 # Cache do Gazebo
 .gazebo/
