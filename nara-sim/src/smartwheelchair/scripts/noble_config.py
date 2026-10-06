@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 """
 NOBLE CONFIG - Dashboard de Simulação
+Dark limpo & profissional - Ciano & Preto
 Cada clique aplica a configuração NO CÓDIGO da NARA automaticamente
 (com backup em .backup_configurador/ para restaurar).
+Botão "CAMARO" no cabeçalho abre o dashboard original do CAMARO.
 """
 
+import json
 import os
 import re
 import shutil
+import signal
+import subprocess
 import sys
 import time
 import pygame
@@ -18,7 +23,36 @@ from pathlib import Path
 # NÚCLEO - Aplicação de configurações no código da NARA
 # (backup + reaplicação idempotente a partir do original)
 # ============================================================
-PACOTE_SRC = Path(__file__).resolve().parent.parent  # .../src/smartwheelchair
+def _resolver_pacote_src() -> Path:
+    """Resolve .../src/smartwheelchair mesmo quando o dashboard roda
+    a partir do install/ (colcon build SEM --symlink-install).
+
+    Com --symlink-install o __file__ já aponta para o src (via symlink).
+    Sem symlink, o __file__ é uma cópia em
+    <ws>/install/smartwheelchair/share/smartwheelchair/scripts/ — nesse
+    caso remapeia para <ws>/src/smartwheelchair. Se não achar, cai no
+    comportamento antigo (parent.parent)."""
+    resolvido = Path(__file__).resolve()
+    partes = resolvido.parts
+    if "install" in partes:
+        i = partes.index("install")
+        ws = Path(*partes[:i])
+        for cand in (ws / "src" / "smartwheelchair",
+                     ws / "src" / "nara-sim" / "src" / "smartwheelchair"):
+            if (cand / "urdf" / "narawheelchair.gazebo").exists():
+                return cand
+        # fallback: troca install/.../share/<pkg> por src/<pkg>
+        try:
+            j = partes.index("share", i)
+            cand = ws / "src" / partes[j + 2] if len(partes) > j + 2 else None
+            if cand is not None and (cand / "package.xml").exists():
+                return cand
+        except ValueError:
+            pass
+    return resolvido.parent.parent
+
+
+PACOTE_SRC = _resolver_pacote_src()  # .../src/smartwheelchair
 URDF_DIR = PACOTE_SRC / "urdf"
 LAUNCH_DIR = PACOTE_SRC / "launch"
 CONFIG_DIR = PACOTE_SRC / "config"
@@ -27,7 +61,9 @@ BACKUP_DIR = PACOTE_SRC / ".backup_configurador"
 ARQUIVOS_MODIFICAVEIS = [
     "urdf/narawheelchair.gazebo",
     "urdf/narawheelchair.xacro",
-    "launch/noblenara.launpy",
+    "launch/noblenara.launch.py",
+    "launch/worldmuseum.launch.py",
+    "launch/worldmuseum_finder.launch.py",
     "config/nav2_params.yaml",
 ]
 
@@ -141,6 +177,50 @@ def _ajustar_camera_user(gazebo_content: str, rate=None) -> str:
     return _editar_bloco_gazebo(gazebo_content, 'name="camera_user"', _transform)
 
 
+MAP_URDF_TAXA = {  # nível URDF -> update_rate dos plugins proprioceptivos
+    "low": 10,
+    "medium": 20,
+    "high": 30,
+}
+
+
+def _ajustar_plugins_urdf(gazebo_content: str, nivel: str) -> str:
+    """Aplica o nível URDF (leve/médio/pesado) nas taxas de publicação
+    do DiffDrive e do JointStatePublisher em narawheelchair.gazebo.
+
+    (As malhas STL somam ~1.5 MB — o custo real de CPU está nas taxas
+    de odom/joints, por isso o nível URDF atua aqui.)"""
+    taxa = MAP_URDF_TAXA.get(nivel)
+    if taxa is None:
+        return gazebo_content
+
+    def _transform(bloco):
+        return re.sub(r'<update_rate>[\d.]+</update_rate>',
+                      f'<update_rate>{taxa}</update_rate>', bloco)
+
+    conteudo = _editar_bloco_gazebo(gazebo_content, 'DiffDrive', _transform)
+    conteudo = _editar_bloco_gazebo(conteudo, 'JointStatePublisher', _transform)
+    return conteudo
+
+
+MAP_MUNDO_ARQUIVO = {
+    "light": "museum_light.world",
+    "default": "museum_default.world",
+    "finder": "museum_finder.world",
+}
+
+
+def _ajustar_world_launch(launch_content: str, mundo: str) -> str:
+    """Troca o mundo padrão (museum_*.world) nos launches de mundo de
+    forma idempotente. O launch já aceita override via
+    world_file:=..., então isso só define o padrão."""
+    arquivo = MAP_MUNDO_ARQUIVO.get(mundo)
+    if arquivo is None:
+        return launch_content
+    return re.sub(r"'worlds',\s*'museum_\w+\.world'",
+                  f"'worlds', '{arquivo}'", launch_content)
+
+
 def _ajustar_nav2(nav2_content: str, amcl_particles=None, mppi_batch=None,
                   controller_frequency=None) -> str:
     """Ajusta parâmetros do nav2_params.yaml"""
@@ -176,9 +256,12 @@ def aplicar_config(config: dict):
     """
     fazer_backup_originais()
 
-    # ============ GAZEBO (sensores) ============
+    # ============ GAZEBO (sensores + taxas URDF) ============
     base_gazebo = _ler_base("urdf/narawheelchair.gazebo")
     conteudo = aplicar_sensor_nivel(base_gazebo, config.get("sensor_quality", "medium"))
+
+    if "urdf_quality" in config:
+        conteudo = _ajustar_plugins_urdf(conteudo, config["urdf_quality"])
 
     if "lidar_samples" in config:
         conteudo = _ajustar_lidar(conteudo, samples=int(config["lidar_samples"]))
@@ -197,6 +280,18 @@ def aplicar_config(config: dict):
 
     with open(URDF_DIR / "narawheelchair.gazebo", "w") as f:
         f.write(conteudo)
+
+    # ============ MUNDO (padrão dos launches de mundo) ============
+    # Aceita tanto a chave do modo iniciante ("world") quanto a do
+    # modo desenvolvedor ("mundo").
+    mundo = config.get("world", config.get("mundo"))
+    if mundo in MAP_MUNDO_ARQUIVO:
+        for launch_rel in ("launch/worldmuseum.launch.py",
+                           "launch/worldmuseum_finder.launch.py"):
+            base_launch = _ler_base(launch_rel)
+            novo_launch = _ajustar_world_launch(base_launch, mundo)
+            with open(PACOTE_SRC / launch_rel, "w") as f:
+                f.write(novo_launch)
 
     # ============ NAV2 (params) ============
     base_nav2 = _ler_base("config/nav2_params.yaml")
@@ -248,6 +343,9 @@ def ler_config_atual() -> dict:
 
     info["camera_user"] = 'name="camera_user"' in gazebo
 
+    m = re.search(r'DiffDrive.*?<update_rate>([\d.]+)</update_rate>', gazebo, re.DOTALL)
+    info["diffdrive_rate"] = float(m.group(1)) if m else 20.0
+
     nav2 = (CONFIG_DIR / "nav2_params.yaml").read_text()
     m = re.search(r'min_particles: (\d+)', nav2)
     info["amcl_min"] = int(m.group(1)) if m else 500
@@ -261,38 +359,256 @@ def ler_config_atual() -> dict:
 
 def gerar_script_inicializacao(config: dict, caminho: Path):
     """Gera script bash com os comandos de inicialização"""
-    cmd_robo = ["ros2", "launch", "smartwheelchair", "noblenara.launpy", "robot_codename:=alfa"]
-    mundo_map = {
-        "light": "museum_light.world",
-        "default": "museum_default.world",
-        "finder": "museum_finder.world",
-    }
-    world_file = mundo_map.get(config.get("world", "default"), "museum_default.world")
+    mundo = config.get("world", config.get("mundo", "default"))
+    world_file = MAP_MUNDO_ARQUIVO.get(mundo, "museum_default.world")
 
     with open(caminho, "w") as f:
         f.write("#!/bin/bash\n")
         f.write("# NOBLE NARA - Simulação configurada pelo dashboard\n")
-        f.write(f"# URDF: {config.get('urdf_quality','medium')} | Sensores: {config.get('sensor_quality','medium')} | SLAM: {config.get('slam_enabled',True)} | Nav2: {config.get('nav2_enabled',True)} | Mundo: {config.get('world','default')}\n\n")
+        f.write(f"# URDF: {config.get('urdf_quality','medium')} | Sensores: {config.get('sensor_quality','medium')} | SLAM: {config.get('slam_enabled',True)} | Nav2: {config.get('nav2_enabled',True)} | Mundo: {mundo}\n\n")
+        f.write('PKG_SHARE="$(ros2 pkg prefix smartwheelchair)/share/smartwheelchair"\n\n')
         f.write("echo '>> Iniciando Gazebo...'\n")
-        f.write(f"ros2 launch smartwheelchair worldmuseum.launpy world_file:={world_file} &\n")
+        f.write(f'ros2 launch smartwheelchair worldmuseum.launch.py "world_file:=${{PKG_SHARE}}/worlds/{world_file}" &\n')
         f.write("sleep 5\n")
         f.write("echo '>> Iniciando robô NARA...'\n")
-        f.write(" ".join(cmd_robo) + " &\n")
+        f.write("ros2 launch smartwheelchair noblenara.launch.py robot_codename:=alfa &\n")
         if config.get("slam_enabled", True):
             f.write("sleep 3\n")
             f.write("echo '>> Iniciando SLAM...'\n")
-            f.write("ros2 launch smartwheelchair slam.launpy robot_codename:=alfa &\n")
+            f.write("ros2 launch smartwheelchair slam.launch.py robot_codename:=alfa &\n")
         if config.get("nav2_enabled", True):
             f.write("sleep 3\n")
             f.write("echo '>> Iniciando Nav2...'\n")
-            f.write("ros2 launch smartwheelchair nav2_launpy robot_codename:=alfa &\n")
-        f.write("\necho '>> Simulação iniciada! CTRL+C para encerrar.\n")
+            f.write("ros2 launch smartwheelchair nav2_launch.py robot_codename:=alfa &\n")
+        f.write("\necho '>> Simulação iniciada! CTRL+C para encerrar.'\n")
         f.write("wait\n")
 
     os.chmod(caminho, 0o755)
     return caminho
 
+# ============================================================
+# CONTROLE DA SIMULAÇÃO — botões INICIAR/PARAR SIM + NAV2 ON/OFF
+# ============================================================
+# O botão SIM sobe mundo + robô + SLAM num único grupo de processos;
+# PARAR mata o grupo inteiro (e o Nav2 junto). O botão NAV2 liga/desliga
+# só o nav2_launch.py. Filhos usam start_new_session, então sobrevivem
+# se o dashboard for fechado — pare pelo botão ou com Ctrl+C no terminal.
+proc_sim = None    # Popen do bloco mundo+robô+SLAM
+proc_nav2 = None   # Popen do Nav2
+_log_sim = None
+_log_nav2 = None
+LOG_SIM = Path("/tmp/noble_sim.log")
+LOG_NAV2 = Path("/tmp/noble_nav2.log")
+ROBOT_CODENAME = "alfa"
+
+
+def _processo_vivo(proc):
+    return proc is not None and proc.poll() is None
+
+
+def sim_rodando():
+    return _processo_vivo(proc_sim)
+
+
+def nav2_rodando():
+    return _processo_vivo(proc_nav2)
+
+
+def _encerrar(proc):
+    """SIGINT no grupo do processo; se não morrer, SIGKILL. Retorna True se morreu."""
+    if not _processo_vivo(proc):
+        return True
+    try:
+        os.killpg(os.getpgid(proc.pid), signal.SIGINT)
+    except (ProcessLookupError, PermissionError):
+        return True
+    try:
+        proc.wait(timeout=8)
+        return True
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        except (ProcessLookupError, PermissionError):
+            pass
+        return False
+
+
+def _fechar_log(which):
+    global _log_sim, _log_nav2
+    try:
+        if which == "sim" and _log_sim is not None:
+            _log_sim.close()
+        elif which == "nav2" and _log_nav2 is not None:
+            _log_nav2.close()
+    except Exception:
+        pass
+    finally:
+        if which == "sim":
+            _log_sim = None
+        else:
+            _log_nav2 = None
+
+
+def _montar_cmd_sim(cfg: dict, visual: bool = True) -> str:
+    """Comando bash que sobe mundo + robô + SLAM em sequência (um grupo só).
+    visual=True abre a janela do Gazebo; False roda só o servidor."""
+    mundo = cfg.get("world", cfg.get("mundo", "default"))
+    world_file = MAP_MUNDO_ARQUIVO.get(mundo, "museum_default.world")
+    gui = "true" if visual else "false"
+    return (
+        'PKG_SHARE="$(ros2 pkg prefix smartwheelchair)/share/smartwheelchair"; '
+        f'ros2 launch smartwheelchair worldmuseum.launch.py "world_file:=${{PKG_SHARE}}/worlds/{world_file}" gui:={gui} & '
+        "sleep 5; "
+        f"ros2 launch smartwheelchair noblenara.launch.py robot_codename:={ROBOT_CODENAME} & "
+        "sleep 3; "
+        f"ros2 launch smartwheelchair slam.launch.py robot_codename:={ROBOT_CODENAME} & "
+        "wait"
+    )
+
+
+def _montar_cmd_nav2(visual: bool = False) -> list:
+    """Comando do Nav2. visual=True abre o RViz junto."""
+    cmd = ["ros2", "launch", "smartwheelchair", "nav2_launch.py",
+           f"robot_codename:={ROBOT_CODENAME}"]
+    if visual:
+        cmd.append("rviz:=true")
+    return cmd
+
+
+def iniciar_simulacao(visual: bool = True):
+    """Sobe mundo + robô + SLAM. Retorna True se iniciou."""
+    global proc_sim, _log_sim, msg, msg_ts
+    if sim_rodando():
+        msg = "[SIM] simulação já está rodando"
+        msg_ts = time.strftime("%H:%M:%S")
+        return False
+    cmd = _montar_cmd_sim(coletar_config(), visual=visual)
+    try:
+        _log_sim = open(LOG_SIM, "a")
+        proc_sim = subprocess.Popen(
+            ["bash", "-c", cmd],
+            start_new_session=True, stdout=_log_sim, stderr=subprocess.STDOUT)
+    except Exception as e:
+        msg = f"[SIM] falhou ao iniciar: {e}"
+        msg_ts = time.strftime("%H:%M:%S")
+        return False
+    modo_txt = "com visual" if visual else "headless (só terminal)"
+    msg = f"[SIM] simulação iniciada ({modo_txt}) — log: {LOG_SIM}"
+    msg_ts = time.strftime("%H:%M:%S")
+    return True
+
+
+def parar_simulacao():
+    """Para Nav2 (se ativo) e depois mundo + robô + SLAM."""
+    global proc_sim, proc_nav2, msg, msg_ts
+    if nav2_rodando():
+        _encerrar(proc_nav2)
+        proc_nav2 = None
+        _fechar_log("nav2")
+    if not sim_rodando():
+        msg = "[SIM] nada rodando"
+        msg_ts = time.strftime("%H:%M:%S")
+        return False
+    ok = _encerrar(proc_sim)
+    proc_sim = None
+    _fechar_log("sim")
+    msg = "[SIM] simulação parada" if ok else "[SIM] parada forçada (SIGKILL)"
+    msg_ts = time.strftime("%H:%M:%S")
+    return True
+
+
+def alternar_nav2(visual: bool = False):
+    """Liga o Nav2 se parado / desliga se rodando. Exige simulação no ar.
+    visual=True abre o RViz junto."""
+    global proc_nav2, _log_nav2, msg, msg_ts
+    if nav2_rodando():
+        ok = _encerrar(proc_nav2)
+        proc_nav2 = None
+        _fechar_log("nav2")
+        msg = "[NAV2] parado" if ok else "[NAV2] parada forçada (SIGKILL)"
+        msg_ts = time.strftime("%H:%M:%S")
+        return True
+    if not sim_rodando():
+        msg = "[NAV2] inicie a SIMULAÇÃO primeiro"
+        msg_ts = time.strftime("%H:%M:%S")
+        return False
+    try:
+        _log_nav2 = open(LOG_NAV2, "a")
+        proc_nav2 = subprocess.Popen(
+            _montar_cmd_nav2(visual=visual),
+            start_new_session=True, stdout=_log_nav2, stderr=subprocess.STDOUT)
+    except Exception as e:
+        msg = f"[NAV2] falhou ao iniciar: {e}"
+        msg_ts = time.strftime("%H:%M:%S")
+        return False
+    modo_txt = "com RViz" if visual else "sem RViz"
+    msg = f"[NAV2] iniciado ({modo_txt}) — log: {LOG_NAV2}"
+    msg_ts = time.strftime("%H:%M:%S")
+    return True
+
 pygame.init()
+
+# ============================================================
+# TROCA DE ROBÔ — botão "CAMARO" no cabeçalho
+# ============================================================
+# Abre o camaro_config.py ORIGINAL do CAMARO (visual e configurações
+# 100% do CAMARO) e fecha este dashboard. O dashboard do CAMARO tem o
+# botão simétrico "NARA". Nada é duplicado: cada dashboard continua
+# dono do seu próprio robô.
+# Override manual (testes): CAMARO_DASHBOARD_PATH=/caminho/camaro_config.py
+CAMARO_DASHBOARD_ENV = "CAMARO_DASHBOARD_PATH"
+COR_CAMARO = (255, 199, 0)  # amarelo Rally do CAMARO (destaque do botão de destino)
+
+
+def localizar_dashboard_camaro():
+    """Procura o camaro_config.py do CAMARO. Retorna Path ou None."""
+    override = os.environ.get(CAMARO_DASHBOARD_ENV)
+    if override:
+        p = Path(override)
+        return p if p.exists() else None
+    rel = Path("noblecamaro-main") / "src" / "camaro_description" / "scripts" / "camaro_config.py"
+    candidatos = [Path.home() / rel]
+    atual = Path(__file__).resolve().parent
+    for _ in range(6):
+        candidatos.append(atual / rel)
+        atual = atual.parent
+    for c in candidatos:
+        if c.exists():
+            return c
+    return None
+
+
+def _robot_btn_rect() -> pygame.Rect:
+    """Retângulo do botão CAMARO (à esquerda do badge de status)."""
+    return pygame.Rect(LARGURA - 256, 14, 110, 26)
+
+
+def desenhar_botao_robo():
+    destino = localizar_dashboard_camaro()
+    r = _robot_btn_rect()
+    cor = COR_CAMARO if destino else SUAVE2
+    pygame.draw.rect(tela, CARD, r, border_radius=13)
+    pygame.draw.rect(tela, cor, r, border_radius=13, width=2)
+    t = f_opc.render("CAMARO", True, cor)
+    tela.blit(t, t.get_rect(center=r.center))
+
+
+def alternar_dashboard():
+    """Abre o dashboard do CAMARO. Retorna True se abriu (chamador fecha este)."""
+    global msg, msg_ts
+    destino = localizar_dashboard_camaro()
+    if destino is None:
+        msg = "[ERRO] Dashboard CAMARO não encontrado (noblecamaro-main)"
+        msg_ts = time.strftime("%H:%M:%S")
+        return False
+    try:
+        subprocess.Popen([sys.executable, str(destino)])
+    except Exception as e:
+        msg = f"[ERRO] não abri o dashboard CAMARO: {e}"
+        msg_ts = time.strftime("%H:%M:%S")
+        return False
+    return True
+
 
 # ============================================================
 # TEMA - Mude a COR do dashboard inteiro aqui
@@ -358,7 +674,7 @@ def _fonte(tam, bold=False):
     nome = ['ubuntusemibold', 'ubuntubold', 'ubuntu'] if bold else ['ubuntu', 'notosans', 'dejavusans']
     return pygame.font.SysFont(nome, tam, bold=bold)
 
-f_logo = _fonte(34, bold=True)
+f_logo = _fonte(38, bold=True)
 f_sub = _fonte(12)
 f_tit = _fonte(14, bold=True)
 f_opc = _fonte(13, bold=True)
@@ -372,19 +688,31 @@ clock = pygame.time.Clock()
 # ============================================================
 # CPU SUAVIZADO (corrige oscilação)
 # ============================================================
-_cpu_fila = [0.0]
-_ultima_tick = time.time()
+# Problemas do cálculo antigo: psutil.cpu_percent(interval=None) retorna
+# sempre 0.0 na 1ª chamada (sem referência anterior) e era amostrado a
+# cada frame (~16ms), gerando ruído. Correção: prime no startup, amostra
+# no máximo 1x a cada 0.5s e média móvel das últimas 6 (~3s de janela).
+_cpu_fila = []
+_cpu_media = 0.0
+_ultima_tick = 0.0
+_CPU_JANELA = 6       # nº de amostras na média móvel
+_CPU_PERIODO = 0.5    # segundos entre amostras
+psutil.cpu_percent(interval=None)  # prime: descarta a 1ª leitura (sempre 0.0)
 
 
 def ler_cpu_suave():
-    """CPU estável: amostra média a cada 0.5s + média móvel de 6 leituras"""
-    global _ultima_cpu, _ultima_tick
-    v = psutil.cpu_percent(interval=None)
-    if v is not None:
-        _cpu_fila.append(v)
-        if len(_cpu_fila) > 6:
-            _cpu_fila.pop(0)
-    return sum(_cpu_fila) / len(_cpu_fila)
+    """CPU estável: 1 amostra a cada 0.5s + média móvel das últimas 6 (~3s)."""
+    global _cpu_media, _ultima_tick
+    agora = time.time()
+    if agora - _ultima_tick >= _CPU_PERIODO:
+        _ultima_tick = agora
+        v = psutil.cpu_percent(interval=None)
+        if v is not None:
+            _cpu_fila.append(v)
+            if len(_cpu_fila) > _CPU_JANELA:
+                _cpu_fila.pop(0)
+            _cpu_media = sum(_cpu_fila) / len(_cpu_fila)
+    return _cpu_media
 
 
 def ler_ram():
@@ -397,9 +725,10 @@ def ler_ram():
 # ============================================================
 
 def _texto_grosso(texto, fonte, centro, cor=ACENTO):
-    """Texto único tom: traço grosso (sem brilho branco)"""
+    """Texto único tom: traço bem cheio (contorno nas 8 direções)"""
     base = fonte.render(texto, True, cor)
-    for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+    for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1),
+                   (-1, -1), (1, -1), (-1, 1), (1, 1)):
         tela.blit(base, base.get_rect(center=(centro[0] + dx, centro[1] + dy)))
     tela.blit(base, base.get_rect(center=centro))
 
@@ -551,7 +880,7 @@ def novo_card(linha, col, titulo, categoria, opcoes, descricao):
 # --- Cards do Modo Iniciante ---
 cards_ini = [
     novo_card(0, 0, "URDF", "urdf", [("LEVE", "low"), ("MÉDIO", "medium"), ("PESADO", "high")],
-              "Qualidade dos modelos 3D e meshes"),
+              "Taxa de publicação odom/juntas (10/20/30 Hz)"),
     novo_card(0, 1, "SENSORES", "sensores", [("LEVE", "low"), ("MÉDIO", "medium"), ("PESADO", "high")],
               "Câmeras, LIDAR e resolução"),
     novo_card(0, 2, "MUNDO", "mundo", [("LEVE", "light"), ("PADRÃO", "default"), ("COMPLETO", "finder")],
@@ -561,10 +890,10 @@ cards_ini = [
 # --- Cartões informativos do Modo Iniciante (o que muda em cada nível) ---
 info_cards_ini = [
     InfoCard("URDF",
-             "nos modelos 3D (meshes)",
-             [("LEVE", "formas simples e leves"),
-              ("MÉDIO", "malhas com visual equilibrado"),
-              ("PESADO", "qualidade visual máxima")],
+             "na taxa odom/juntas",
+             [("LEVE", "plugins a 10 Hz (leve)"),
+              ("MÉDIO", "plugins a 20 Hz (padrão)"),
+              ("PESADO", "plugins a 30 Hz (máximo)")],
              COL_X[0], LINHA_Y[1], CW, CH),
     InfoCard("SENSORES",
              "em câmeras e no LIDAR",
@@ -606,6 +935,8 @@ cards_dev = [
 modo = "iniciante"
 msg = "PRONTO - selecione uma opção"
 msg_ts = time.strftime("%H:%M:%S")
+confirmar_saida = False
+_modal_imagem = None
 
 # ============================================================
 # SINCRONIZAÇÃO COM O CÓDIGO REAL DA NARA
@@ -648,9 +979,14 @@ def sincronizar_do_codigo():
         nivel_sensor = "high"
     else:
         nivel_sensor = "medium"
+    # Nível URDF derivado da taxa dos plugins (10/20/30 Hz)
+    taxa = atual.get("diffdrive_rate", 20.0)
+    nivel_urdf = "low" if taxa <= 10 else ("high" if taxa >= 30 else "medium")
     for c in cards_ini:
         if c.categoria == "sensores":
             c.definir(nivel_sensor)
+        elif c.categoria == "urdf":
+            c.definir(nivel_urdf)
 
 
 def coletar_config() -> dict:
@@ -684,6 +1020,7 @@ def aplicar_atual():
 
     script = Path(__file__).resolve().parent / "iniciar_simulacao.sh"
     gerar_script_inicializacao(cfg, script)
+    salvar_estado_ui()
 
     resumo = " / ".join(f"{k.upper()}: {v}" for k, v in cfg.items())
     msg = "[APLICADO] " + resumo
@@ -691,11 +1028,67 @@ def aplicar_atual():
     return cfg
 
 
+def _caminho_estado():
+    return BACKUP_DIR / "ultima_config.json"
+
+
+def salvar_estado_ui():
+    """Persiste a última configuração aplicada p/ reabrir o painel igual"""
+    try:
+        BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+        _caminho_estado().write_text(
+            json.dumps({"modo": modo, "config": coletar_config()}, indent=2))
+    except Exception:
+        pass
+
+
+def _card_por_chave(chave: str):
+    if chave == "urdf_quality":
+        for c in cards_ini:
+            if c.categoria == "urdf":
+                return c
+    elif chave == "sensor_quality":
+        for c in cards_ini:
+            if c.categoria == "sensores":
+                return c
+    elif chave in ("world", "mundo"):
+        cards_atual = cards_dev if modo == "desenvolvedor" else cards_ini
+        for c in cards_atual:
+            if c.categoria == "mundo":
+                return c
+        for c in (cards_ini if cards_atual is cards_dev else cards_dev):
+            if c.categoria == "mundo":
+                return c
+    else:
+        for c in cards_dev:
+            if c.categoria == chave and c.categoria != "mundo":
+                return c
+    return None
+
+
+def aplicar_estado_salvo():
+    """Restaura no painel a última configuração aplicada (se existir)"""
+    global modo
+    caminho = _caminho_estado()
+    if not caminho.exists():
+        return
+    try:
+        dados = json.loads(caminho.read_text())
+    except Exception:
+        return
+    modo = dados.get("modo", "iniciante")
+    for chave, valor in dados.get("config", {}).items():
+        c = _card_por_chave(chave)
+        if c is not None:
+            c.definir(valor)
+
+
 def restaurar():
     """Restaura o código original e reseta os botões"""
     global msg, msg_ts
     restaurar_originais()
     restaurar_ui_padrao()
+    salvar_estado_ui()
     msg = "[RESTAURADO] código original da NARA restaurado"
     msg_ts = time.strftime("%H:%M:%S")
 
@@ -742,6 +1135,8 @@ def dados_resumo() -> list:
         ("AMCL", f"{a['amcl_min']}–{a['amcl_max']} partículas"),
         ("MPPI BATCH", f"{a['mppi_batch']} simulações/ciclo"),
         ("MUNDO", f"{mundo} .world"),
+        ("SIMULAÇÃO", "rodando" if sim_rodando() else "parada"),
+        ("NAV2", "ativo" if nav2_rodando() else "inativo"),
         ("SLAM / NAV2", "sempre ativos (fixos)"),
         ("SEGURANÇA", "Collision Monitor ON   ·   Planner SmacPlannerHybrid fixo"),
     ]
@@ -764,13 +1159,12 @@ def desenhar_cabecalho():
     _texto_grosso("NOBLECONFIG", f_logo, (LARGURA // 2, 34))
     pygame.draw.line(tela, ACENTO_SUAVE, (0, 76), (LARGURA, 76), width=2)
 
-    # Badge de versão com indicador (à esquerda)
-    b = pygame.Rect(18, 12, 150, 28)
+    # Badge com o nome + versão (sem ícone, texto centralizado)
+    b = pygame.Rect(18, 12, 175, 28)
     pygame.draw.rect(tela, CARD, b, border_radius=14)
     pygame.draw.rect(tela, LINHA, b, border_radius=14, width=1)
-    pygame.draw.circle(tela, ACENTO, (b.x + 18, b.centery), 4)
-    t = f_mini.render("NOBLE CONFIG", True, ACENTO)
-    tela.blit(t, t.get_rect(center=(b.x + 94, b.centery)))
+    t = f_mini.render("NOBLE CONFIG V2.0", True, ACENTO)
+    tela.blit(t, t.get_rect(center=b.center))
 
     # Status conectado (à direita)
     s = pygame.Rect(LARGURA - 138, 14, 120, 26)
@@ -779,6 +1173,9 @@ def desenhar_cabecalho():
     pygame.draw.circle(tela, VERDE, (s.x + 16, s.centery), 4)
     t = f_mini.render("CÓDIGO NARA", True, SUAVE)
     tela.blit(t, t.get_rect(center=(s.x + 78, s.centery)))
+
+    # Botão de troca de robô (CAMARO)
+    desenhar_botao_robo()
 
     t = f_sub.render("Configurador de desempenho - aplica no código em tempo real", True, SUAVE2)
     tela.blit(t, t.get_rect(center=(LARGURA // 2, 62)))
@@ -879,12 +1276,39 @@ def desenhar_painel_resumo():
 
 
 def desenhar_acoes(y):
-    rect = pygame.Rect(LARGURA // 2 - 170, y, 340, 46)
-    pygame.draw.rect(tela, CARD, rect, border_radius=12)
-    pygame.draw.rect(tela, ACENTO, rect, border_radius=12, width=2)
+    """Três botões: SIMULAÇÃO | NAV2 | RESTAURAR. Retorna dict de rects."""
+    bw, bh, gap = 220, 46, 16
+    x0 = LARGURA // 2 - (3 * bw + 2 * gap) // 2
+    rects = {
+        "sim": pygame.Rect(x0, y, bw, bh),
+        "nav2": pygame.Rect(x0 + bw + gap, y, bw, bh),
+        "restaurar": pygame.Rect(x0 + 2 * (bw + gap), y, bw, bh),
+    }
+    # SIM — igual ao RESTAURAR PADRÃO quando parado (contorno azul),
+    # todo preenchido azul com letra preta quando rodando
+    if sim_rodando():
+        pygame.draw.rect(tela, ACENTO, rects["sim"], border_radius=12)
+        txt = f_btn.render("PARAR SIM", True, PRETO)
+    else:
+        pygame.draw.rect(tela, CARD, rects["sim"], border_radius=12)
+        pygame.draw.rect(tela, ACENTO, rects["sim"], border_radius=12, width=2)
+        txt = f_btn.render("INICIAR SIM", True, ACENTO)
+    tela.blit(txt, txt.get_rect(center=rects["sim"].center))
+    # NAV2 — preenchido quando ativo
+    if nav2_rodando():
+        pygame.draw.rect(tela, ACENTO, rects["nav2"], border_radius=12)
+        txt = f_btn.render("NAV2: ON", True, PRETO)
+    else:
+        pygame.draw.rect(tela, CARD, rects["nav2"], border_radius=12)
+        pygame.draw.rect(tela, LINHA, rects["nav2"], border_radius=12, width=1)
+        txt = f_btn.render("NAV2: OFF", True, SUAVE)
+    tela.blit(txt, txt.get_rect(center=rects["nav2"].center))
+    # RESTAURAR
+    pygame.draw.rect(tela, CARD, rects["restaurar"], border_radius=12)
+    pygame.draw.rect(tela, ACENTO, rects["restaurar"], border_radius=12, width=2)
     txt = f_btn.render("RESTAURAR PADRÃO", True, ACENTO)
-    tela.blit(txt, txt.get_rect(center=rect.center))
-    return rect
+    tela.blit(txt, txt.get_rect(center=rects["restaurar"].center))
+    return rects
 
 
 def desenhar_rodape():
@@ -939,20 +1363,154 @@ def renderizar():
 # MAIN
 # ============================================================
 
-def main():
-    global modo, msg
-    sincronizar_do_codigo()
+# Popup COM VISUAL / SEM VISUAL (None | "sim" | "nav2").
+# Abre ao clicar INICIAR SIM ou NAV2 parados; a escolha vale para essa vez.
+modal_visual = None
 
-    ret_restaurar = None
+
+def _modal_visual_rects():
+    janela = pygame.Rect(0, 0, 520, 300)
+    janela.center = (LARGURA // 2, ALTURA // 2)
+    return {
+        "com": pygame.Rect(janela.x + 40, janela.y + 128, 200, 52),
+        "sem": pygame.Rect(janela.x + 280, janela.y + 128, 200, 52),
+        "cancelar": pygame.Rect(janela.centerx - 70, janela.y + 208, 140, 40),
+    }
+
+
+def desenhar_modal_visual():
+    alvo = modal_visual or "sim"
+    titulo = "INICIAR SIMULAÇÃO?" if alvo == "sim" else "INICIAR NAV2?"
+    if alvo == "sim":
+        sub, rot_com, rot_sem = "Abrir a janela do Gazebo?", "COM VISUAL", "SEM VISUAL"
+    else:
+        sub, rot_com, rot_sem = "Abrir o RViz junto?", "COM RVIZ", "SEM RVIZ"
+
+    img = pygame.Surface((LARGURA, ALTURA), pygame.SRCALPHA)
+    img.fill((0, 0, 0, 150))
+
+    janela = pygame.Rect(0, 0, 520, 300)
+    janela.center = (LARGURA // 2, ALTURA // 2)
+    pygame.draw.rect(img, CARD, janela, border_radius=14)
+    pygame.draw.rect(img, ACENTO, janela, border_radius=14, width=2)
+
+    t = f_tit.render(titulo, True, ACENTO)
+    img.blit(t, t.get_rect(center=(janela.centerx, janela.y + 44)))
+    t = f_rod.render(sub, True, BRANCO)
+    img.blit(t, t.get_rect(center=(janela.centerx, janela.y + 76)))
+    t = f_mini.render("A escolha vale para esta vez.", True, SUAVE)
+    img.blit(t, t.get_rect(center=(janela.centerx, janela.y + 100)))
+
+    rets = _modal_visual_rects()
+    for chave, rot in (("com", rot_com), ("sem", rot_sem)):
+        r = rets[chave]
+        pygame.draw.rect(img, ACENTO, r, border_radius=10)
+        t = f_btn.render(rot, True, PRETO)
+        img.blit(t, t.get_rect(center=r.center))
+
+    r = rets["cancelar"]
+    pygame.draw.rect(img, CARD_ALT, r, border_radius=10)
+    pygame.draw.rect(img, LINHA, r, border_radius=10, width=1)
+    t = f_btn.render("CANCELAR", True, SUAVE)
+    img.blit(t, t.get_rect(center=r.center))
+
+    tela.blit(img, (0, 0))
+
+
+def _modal_saida_rects():
+    janela = pygame.Rect(0, 0, 600, 330)
+    janela.center = (LARGURA // 2, ALTURA // 2)
+    larg_btn = 250
+    xb = janela.centerx - larg_btn // 2
+    return {
+        "manter": pygame.Rect(xb, janela.y + 128, larg_btn, 46),
+        "restaurar": pygame.Rect(xb, janela.y + 184, larg_btn, 46),
+        "cancelar": pygame.Rect(xb, janela.y + 246, 140, 40),
+    }
+
+
+def construir_modal_saida():
+    global _modal_imagem
+
+    img = pygame.Surface((LARGURA, ALTURA), pygame.SRCALPHA)
+    img.fill((0, 0, 0, 150))
+
+    janela = pygame.Rect(0, 0, 600, 330)
+    janela.center = (LARGURA // 2, ALTURA // 2)
+    pygame.draw.rect(img, CARD, janela, border_radius=14)
+    pygame.draw.rect(img, ACENTO, janela, border_radius=14, width=2)
+    pygame.draw.rect(img, ACENTO, (janela.x, janela.y, janela.w, 5),
+                     border_top_left_radius=14, border_top_right_radius=14)
+
+    t = f_tit.render("FECHAR DASHBOARD?", True, ACENTO)
+    img.blit(t, t.get_rect(center=(janela.centerx, janela.y + 42)))
+    t = f_rod.render("As alterações aplicadas no código da NARA ficam salvas.", True, BRANCO)
+    img.blit(t, t.get_rect(center=(janela.centerx, janela.y + 74)))
+    t = f_mini.render("Escolha manter as mudanças ou restaurar os originais antes de fechar.", True, SUAVE)
+    img.blit(t, t.get_rect(center=(janela.centerx, janela.y + 96)))
+
+    rets = _modal_saida_rects()
+
+    r = rets["manter"]
+    pygame.draw.rect(img, ACENTO, r, border_radius=10)
+    t = f_btn.render("FECHAR E MANTER", True, PRETO)
+    img.blit(t, t.get_rect(center=r.center))
+
+    r = rets["restaurar"]
+    pygame.draw.rect(img, CARD, r, border_radius=10)
+    pygame.draw.rect(img, AMBAR, r, border_radius=10, width=2)
+    t = f_btn.render("RESTAURAR E FECHAR", True, AMBAR)
+    img.blit(t, t.get_rect(center=r.center))
+
+    r = rets["cancelar"]
+    pygame.draw.rect(img, CARD_ALT, r, border_radius=10)
+    pygame.draw.rect(img, LINHA, r, border_radius=10, width=1)
+    t = f_btn.render("CANCELAR", True, SUAVE)
+    img.blit(t, t.get_rect(center=r.center))
+
+    _modal_imagem = img
+
+
+def desenhar_modal_saida():
+    if _modal_imagem is None:
+        construir_modal_saida()
+    tela.blit(_modal_imagem, (0, 0))
+
+
+def main():
+    global modo, msg, msg_ts, confirmar_saida, modal_visual
+    sincronizar_do_codigo()
+    aplicar_estado_salvo()
+
+    ret_acoes = None
     rodando = True
     while rodando:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
-                rodando = False
+                if not confirmar_saida:
+                    confirmar_saida = True
                 continue
 
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
                 pos = evento.pos
+
+                if confirmar_saida:
+                    rets = _modal_saida_rects()
+                    if rets["manter"].collidepoint(pos):
+                        rodando = False
+                    elif rets["restaurar"].collidepoint(pos):
+                        restaurar()
+                        rodando = False
+                    elif rets["cancelar"].collidepoint(pos):
+                        confirmar_saida = False
+                    continue
+
+                # Botão de troca de robô (CAMARO): abre o dashboard
+                # original do CAMARO e fecha este
+                if _robot_btn_rect().collidepoint(pos):
+                    if alternar_dashboard():
+                        rodando = False
+                    continue
 
                 # Toggle modo
                 larg = 340
@@ -979,13 +1537,49 @@ def main():
                     aplicar_atual()
                     continue
 
-                # Botão restaurar
-                if ret_restaurar is not None and ret_restaurar.collidepoint(pos):
-                    restaurar()
-                    sincronizar_do_codigo()
+                # Popup COM/SEM VISUAL (aberto pelo SIM ou NAV2)
+                if modal_visual is not None:
+                    rets = _modal_visual_rects()
+                    if rets["com"].collidepoint(pos):
+                        if modal_visual == "sim":
+                            iniciar_simulacao(visual=True)
+                        else:
+                            alternar_nav2(visual=True)
+                        modal_visual = None
+                    elif rets["sem"].collidepoint(pos):
+                        if modal_visual == "sim":
+                            iniciar_simulacao(visual=False)
+                        else:
+                            alternar_nav2(visual=False)
+                        modal_visual = None
+                    elif rets["cancelar"].collidepoint(pos):
+                        modal_visual = None
                     continue
 
-        ret_restaurar = renderizar()
+                # Botões de ação: sim / nav2 / restaurar
+                if ret_acoes is not None:
+                    if ret_acoes["sim"].collidepoint(pos):
+                        if sim_rodando():
+                            parar_simulacao()
+                        else:
+                            modal_visual = "sim"
+                        continue
+                    if ret_acoes["nav2"].collidepoint(pos):
+                        if nav2_rodando():
+                            alternar_nav2()
+                        else:
+                            modal_visual = "nav2"
+                        continue
+                    if ret_acoes["restaurar"].collidepoint(pos):
+                        restaurar()
+                        sincronizar_do_codigo()
+                        continue
+
+        ret_acoes = renderizar()
+        if confirmar_saida:
+            desenhar_modal_saida()
+        if modal_visual is not None:
+            desenhar_modal_visual()
         pygame.display.flip()
         clock.tick(60)
 

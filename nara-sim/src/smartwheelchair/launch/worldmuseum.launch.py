@@ -2,7 +2,8 @@
 
 from launch import LaunchDescription
 from launch.actions import ExecuteProcess, DeclareLaunchArgument, SetEnvironmentVariable
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.conditions import IfCondition
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.actions import Node
 
@@ -22,6 +23,14 @@ def generate_launch_description():
         default_value=PathJoinSubstitution([pkg_share, 'worlds', 'museum_default.world']),
         description='Full path to world file'
     )
+
+    # COM VISUAL (gui:=true, padrão) abre a janela do Gazebo;
+    # SEM VISUAL (gui:=false) roda só o servidor (terminal)
+    gui_arg = DeclareLaunchArgument(
+        'gui',
+        default_value='true',
+        description='Abrir janela do Gazebo (true) ou rodar só o servidor (false)'
+    )
     
     # Get the world file path
     world_file = LaunchConfiguration('world_file')
@@ -33,11 +42,12 @@ def generate_launch_description():
         output='screen'
     )
     
-    # Launch Gazebo client (GUI)
+    # Launch Gazebo client (GUI) — só quando gui:=true
     gazebo_client = ExecuteProcess(
         cmd=['gz', 'sim', '-g'],
         name='gazebo_client',
-        output='screen'
+        output='screen',
+        condition=IfCondition(PythonExpression(["'", LaunchConfiguration('gui'), "' == 'true'"])),
     )
     
     global_bridge = Node(
@@ -53,6 +63,7 @@ def generate_launch_description():
     return LaunchDescription([
         gazebo_resource_path,
         world_file_arg,
+        gui_arg,
         gazebo_server,
         gazebo_client,
         global_bridge,

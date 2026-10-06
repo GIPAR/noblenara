@@ -26,8 +26,6 @@ def generate_launch_description():
             # Tópicos
             "odom_topic": ["/noblenara/", robot_codename, "/odom"],
             "topic": ["/noblenara/", robot_codename, "/scan_filtered"],
-            "global_costmap.global_costmap.ros__parameters.voxel_layer.pointcloud.topic": ["/noblenara/", robot_codename, "/camera_link/points"],
-            "local_costmap.local_costmap.ros__parameters.voxel_layer.pointcloud.topic": ["/noblenara/", robot_codename, "/camera_link/points"],
             "cmd_vel_in_topic": ["/noblenara/", robot_codename, "/cmd_vel/raw"],
             "cmd_vel_out_topic": ["/noblenara/", robot_codename, "/cmd_vel"],
             # Frames
@@ -156,5 +154,16 @@ def generate_launch_description():
         DeclareLaunchArgument('robot_codename', default_value='alfa'),
         DeclareLaunchArgument( 'params_file', default_value=os.path.join(pkg_share, 'config', 'nav2_params.yaml'), description='Caminho completo para o arquivo de parâmetros do Nav2'),
         DeclareLaunchArgument( 'map_file', default_value=os.path.join('none'), description='Caminho completo para o .yaml do mapa salvo (gerado pelo map_saver_cli)'),
+        # COM RVIZ (rviz:=true) abre o visualizador; SEM (false, padrão) só os nós
+        DeclareLaunchArgument('rviz', default_value='false', description='Abrir o RViz junto (true) ou só os nós do Nav2 (false)'),
         Nav2_Nodes,
+        Node(
+            condition=IfCondition(PythonExpression(["'", LaunchConfiguration('rviz'), "' == 'true'"])),
+            package='rviz2',
+            executable='rviz2',
+            name='rviz2',
+            output='screen',
+            arguments=['-d', os.path.join(pkg_share, 'config', 'nav2_config.rviz')],
+            parameters=[{'use_sim_time': True}],
+        ),
     ])
