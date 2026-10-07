@@ -249,21 +249,21 @@
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_A_doorwall_a_col">
-        <pose>9.25 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>9.5 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_A_doorwall_a_vis">
-        <pose>9.25 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>9.5 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_A_doorwall_b_col">
-        <pose>12.75 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>12.5 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_A_doorwall_b_vis">
-        <pose>12.75 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>12.5 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_A_backwall_col">
@@ -294,21 +294,21 @@
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_B_doorwall_a_col">
-        <pose>9.25 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>9.5 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_B_doorwall_a_vis">
-        <pose>9.25 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>9.5 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_B_doorwall_b_col">
-        <pose>12.75 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>12.5 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_B_doorwall_b_vis">
-        <pose>12.75 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>12.5 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_B_backwall_col">
@@ -339,21 +339,21 @@
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_C_doorwall_a_col">
-        <pose>16.25 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>16.5 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_C_doorwall_a_vis">
-        <pose>16.25 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>16.5 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_C_doorwall_b_col">
-        <pose>19.75 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>19.5 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_C_doorwall_b_vis">
-        <pose>19.75 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>19.5 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_C_backwall_col">
@@ -384,21 +384,21 @@
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_D_doorwall_a_col">
-        <pose>16.25 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>16.5 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_D_doorwall_a_vis">
-        <pose>16.25 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>16.5 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_D_doorwall_b_col">
-        <pose>19.75 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>19.5 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_D_doorwall_b_vis">
-        <pose>19.75 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.5 0.2 2.5</size></box></geometry>
+        <pose>19.5 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_D_backwall_col">
@@ -460,63 +460,354 @@
           <diffuse>1 0.15 0.55 1</diffuse>
         </material>
       </visual></link>
+      <collision name="lintel_A_col">
+        <pose>11 2.0 2.3 0 0 0</pose>
+        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+      </collision>
+      <visual name="lintel_A_vis">
+        <pose>11 2.0 2.3 0 0 0</pose>
+        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="lintel_B_col">
+        <pose>11 -2.0 2.3 0 0 0</pose>
+        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+      </collision>
+      <visual name="lintel_B_vis">
+        <pose>11 -2.0 2.3 0 0 0</pose>
+        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="lintel_C_col">
+        <pose>18 2.0 2.3 0 0 0</pose>
+        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+      </collision>
+      <visual name="lintel_C_vis">
+        <pose>18 2.0 2.3 0 0 0</pose>
+        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="lintel_D_col">
+        <pose>18 -2.0 2.3 0 0 0</pose>
+        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+      </collision>
+      <visual name="lintel_D_vis">
+        <pose>18 -2.0 2.3 0 0 0</pose>
+        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
     </model>
 
-    <!-- ===== TAPETES (só visual, sem colisão; topo em z=0.032, abaixo do LiDAR) ===== -->
-    <model name='carpet_a'>
-      <static>true</static>
-      <link name='link'>
+    <!-- ===== PORTA A (giratoria, folha unica 0.90 azul; abre p/ dentro da sala) ===== -->
+    <model name='door_A'>
+      <link name='jamb_left'>
+        <pose>10.55 2.0 0 0 0 0</pose>
+        <inertial>
+          <mass>2.0</mass>
+          <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
+        </inertial>
+        <collision name='col'>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+        </collision>
         <visual name='vis'>
-          <pose>11 1.2 0.026 0 0 0</pose>
-          <geometry><box><size>2.0 1.2 0.012</size></box></geometry>
-          <material>
-            <ambient>0.08 0.35 0.85 1</ambient>
-            <diffuse>0.08 0.35 0.85 1</diffuse>
-          </material>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+          <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
         </visual>
       </link>
+      <link name='jamb_right'>
+        <pose>11.45 2.0 0 0 0 0</pose>
+        <inertial>
+          <mass>2.0</mass>
+          <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
+        </inertial>
+        <collision name='col'>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+        </collision>
+        <visual name='vis'>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+          <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+        </visual>
+      </link>
+      <link name='leaf'>
+        <pose>10.55 2.0 0 0 0 0</pose>
+        <inertial>
+          <mass>5.0</mass>
+          <inertia><ixx>1.84</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.18</iyy><iyz>0</iyz><izz>0.34</izz></inertia>
+        </inertial>
+        <collision name='col'>
+          <pose>0.45 0 1.05 0 0 0</pose>
+          <geometry><box><size>0.9 0.08 2.1</size></box></geometry>
+        </collision>
+        <visual name='vis'>
+          <pose>0.45 0 1.05 0 0 0</pose>
+          <geometry><box><size>0.9 0.08 2.1</size></box></geometry>
+          <material><ambient>0.1 0.45 1 1</ambient><diffuse>0.1 0.45 1 1</diffuse></material>
+        </visual>
+      </link>
+      <joint name='fix_left' type='fixed'>
+        <parent>world</parent>
+        <child>jamb_left</child>
+      </joint>
+      <joint name='fix_right' type='fixed'>
+        <parent>world</parent>
+        <child>jamb_right</child>
+      </joint>
+      <joint name='hinge_A' type='revolute'>
+        <parent>jamb_left</parent>
+        <child>leaf</child>
+        <pose>0 0 0 0 0 0</pose>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit>
+            <lower>0</lower>
+            <upper>1.55</upper>
+            <effort>50</effort>
+            <velocity>1.0</velocity>
+          </limit>
+          <dynamics><damping>0.3</damping><friction>0.1</friction></dynamics>
+        </axis>
+      </joint>
+      <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+        <joint_name>hinge_A</joint_name>
+      </plugin>
     </model>
 
-    <model name='carpet_b'>
-      <static>true</static>
-      <link name='link'>
+    <!-- ===== PORTA B (giratoria, folha unica 0.90 verde; abre p/ dentro da sala) ===== -->
+    <model name='door_B'>
+      <link name='jamb_left'>
+        <pose>10.55 -2.0 0 0 0 0</pose>
+        <inertial>
+          <mass>2.0</mass>
+          <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
+        </inertial>
+        <collision name='col'>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+        </collision>
         <visual name='vis'>
-          <pose>11 -1.2 0.026 0 0 0</pose>
-          <geometry><box><size>2.0 1.2 0.012</size></box></geometry>
-          <material>
-            <ambient>0.08 0.6 0.25 1</ambient>
-            <diffuse>0.08 0.6 0.25 1</diffuse>
-          </material>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+          <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
         </visual>
       </link>
+      <link name='jamb_right'>
+        <pose>11.450000000000001 -2.0 0 0 0 0</pose>
+        <inertial>
+          <mass>2.0</mass>
+          <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
+        </inertial>
+        <collision name='col'>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+        </collision>
+        <visual name='vis'>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+          <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+        </visual>
+      </link>
+      <link name='leaf'>
+        <pose>10.55 -2.0 0 0 0 0</pose>
+        <inertial>
+          <mass>5.0</mass>
+          <inertia><ixx>1.84</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.18</iyy><iyz>0</iyz><izz>0.34</izz></inertia>
+        </inertial>
+        <collision name='col'>
+          <pose>0.45 0 1.05 0 0 0</pose>
+          <geometry><box><size>0.9 0.08 2.1</size></box></geometry>
+        </collision>
+        <visual name='vis'>
+          <pose>0.45 0 1.05 0 0 0</pose>
+          <geometry><box><size>0.9 0.08 2.1</size></box></geometry>
+          <material><ambient>0.1 0.75 0.3 1</ambient><diffuse>0.1 0.75 0.3 1</diffuse></material>
+        </visual>
+      </link>
+      <joint name='fix_left' type='fixed'>
+        <parent>world</parent>
+        <child>jamb_left</child>
+      </joint>
+      <joint name='fix_right' type='fixed'>
+        <parent>world</parent>
+        <child>jamb_right</child>
+      </joint>
+      <joint name='hinge_B' type='revolute'>
+        <parent>jamb_left</parent>
+        <child>leaf</child>
+        <pose>0 0 0 0 0 0</pose>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit>
+            <lower>-1.55</lower>
+            <upper>0</upper>
+            <effort>50</effort>
+            <velocity>1.0</velocity>
+          </limit>
+          <dynamics><damping>0.3</damping><friction>0.1</friction></dynamics>
+        </axis>
+      </joint>
+      <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+        <joint_name>hinge_B</joint_name>
+      </plugin>
     </model>
 
-    <model name='carpet_c'>
-      <static>true</static>
-      <link name='link'>
+    <!-- ===== PORTA C (giratoria, folha unica 0.90 laranja; abre p/ dentro da sala) ===== -->
+    <model name='door_C'>
+      <link name='jamb_left'>
+        <pose>17.55 2.0 0 0 0 0</pose>
+        <inertial>
+          <mass>2.0</mass>
+          <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
+        </inertial>
+        <collision name='col'>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+        </collision>
         <visual name='vis'>
-          <pose>18 1.2 0.026 0 0 0</pose>
-          <geometry><box><size>2.0 1.2 0.012</size></box></geometry>
-          <material>
-            <ambient>0.85 0.45 0.08 1</ambient>
-            <diffuse>0.85 0.45 0.08 1</diffuse>
-          </material>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+          <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
         </visual>
       </link>
+      <link name='jamb_right'>
+        <pose>18.45 2.0 0 0 0 0</pose>
+        <inertial>
+          <mass>2.0</mass>
+          <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
+        </inertial>
+        <collision name='col'>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+        </collision>
+        <visual name='vis'>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+          <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+        </visual>
+      </link>
+      <link name='leaf'>
+        <pose>17.55 2.0 0 0 0 0</pose>
+        <inertial>
+          <mass>5.0</mass>
+          <inertia><ixx>1.84</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.18</iyy><iyz>0</iyz><izz>0.34</izz></inertia>
+        </inertial>
+        <collision name='col'>
+          <pose>0.45 0 1.05 0 0 0</pose>
+          <geometry><box><size>0.9 0.08 2.1</size></box></geometry>
+        </collision>
+        <visual name='vis'>
+          <pose>0.45 0 1.05 0 0 0</pose>
+          <geometry><box><size>0.9 0.08 2.1</size></box></geometry>
+          <material><ambient>1 0.55 0.1 1</ambient><diffuse>1 0.55 0.1 1</diffuse></material>
+        </visual>
+      </link>
+      <joint name='fix_left' type='fixed'>
+        <parent>world</parent>
+        <child>jamb_left</child>
+      </joint>
+      <joint name='fix_right' type='fixed'>
+        <parent>world</parent>
+        <child>jamb_right</child>
+      </joint>
+      <joint name='hinge_C' type='revolute'>
+        <parent>jamb_left</parent>
+        <child>leaf</child>
+        <pose>0 0 0 0 0 0</pose>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit>
+            <lower>0</lower>
+            <upper>1.55</upper>
+            <effort>50</effort>
+            <velocity>1.0</velocity>
+          </limit>
+          <dynamics><damping>0.3</damping><friction>0.1</friction></dynamics>
+        </axis>
+      </joint>
+      <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+        <joint_name>hinge_C</joint_name>
+      </plugin>
     </model>
 
-    <model name='carpet_d'>
-      <static>true</static>
-      <link name='link'>
+    <!-- ===== PORTA D (giratoria, folha unica 0.90 rosa; abre p/ dentro da sala) ===== -->
+    <model name='door_D'>
+      <link name='jamb_left'>
+        <pose>17.55 -2.0 0 0 0 0</pose>
+        <inertial>
+          <mass>2.0</mass>
+          <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
+        </inertial>
+        <collision name='col'>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+        </collision>
         <visual name='vis'>
-          <pose>18 -1.2 0.026 0 0 0</pose>
-          <geometry><box><size>2.0 1.2 0.012</size></box></geometry>
-          <material>
-            <ambient>0.85 0.12 0.45 1</ambient>
-            <diffuse>0.85 0.12 0.45 1</diffuse>
-          </material>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+          <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
         </visual>
       </link>
+      <link name='jamb_right'>
+        <pose>18.45 -2.0 0 0 0 0</pose>
+        <inertial>
+          <mass>2.0</mass>
+          <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
+        </inertial>
+        <collision name='col'>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+        </collision>
+        <visual name='vis'>
+          <pose>0 0 1.25 0 0 0</pose>
+          <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
+          <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+        </visual>
+      </link>
+      <link name='leaf'>
+        <pose>17.55 -2.0 0 0 0 0</pose>
+        <inertial>
+          <mass>5.0</mass>
+          <inertia><ixx>1.84</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.18</iyy><iyz>0</iyz><izz>0.34</izz></inertia>
+        </inertial>
+        <collision name='col'>
+          <pose>0.45 0 1.05 0 0 0</pose>
+          <geometry><box><size>0.9 0.08 2.1</size></box></geometry>
+        </collision>
+        <visual name='vis'>
+          <pose>0.45 0 1.05 0 0 0</pose>
+          <geometry><box><size>0.9 0.08 2.1</size></box></geometry>
+          <material><ambient>1 0.15 0.55 1</ambient><diffuse>1 0.15 0.55 1</diffuse></material>
+        </visual>
+      </link>
+      <joint name='fix_left' type='fixed'>
+        <parent>world</parent>
+        <child>jamb_left</child>
+      </joint>
+      <joint name='fix_right' type='fixed'>
+        <parent>world</parent>
+        <child>jamb_right</child>
+      </joint>
+      <joint name='hinge_D' type='revolute'>
+        <parent>jamb_left</parent>
+        <child>leaf</child>
+        <pose>0 0 0 0 0 0</pose>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit>
+            <lower>-1.55</lower>
+            <upper>0</upper>
+            <effort>50</effort>
+            <velocity>1.0</velocity>
+          </limit>
+          <dynamics><damping>0.3</damping><friction>0.1</friction></dynamics>
+        </axis>
+      </joint>
+      <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+        <joint_name>hinge_D</joint_name>
+      </plugin>
     </model>
 
     <!-- ===== BASE/HOME (spawn do camaro) =====
