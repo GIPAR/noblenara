@@ -24,8 +24,19 @@ def generate_launch_description():
         root_key=['/noblenara/', robot_codename],
         param_rewrites= {
             # Tópicos
+            # NOTA: NÃO usar a chave genérica "topic" aqui! Ela sobrescreveria
+            # TAMBÉM o tópico PointCloud2 do voxel_layer com o tópico do
+            # LaserScan, criando duas inscrições de tipos diferentes no mesmo
+            # tópico (/noblenara/<codename>/scan_filtered) e quebrando a
+            # ativação do local_costmap/global_costmap ("invalid allocator",
+            # lifecycle_manager aborta e o 2D Goal Pose nunca anda).
+            # Por isso cada tópico é reescrito pelo caminho completo.
             "odom_topic": ["/noblenara/", robot_codename, "/odom"],
-            "topic": ["/noblenara/", robot_codename, "/scan_filtered"],
+            "global_costmap.global_costmap.ros__parameters.obstacle_layer.scan.topic": ["/noblenara/", robot_codename, "/scan_filtered"],
+            "local_costmap.local_costmap.ros__parameters.obstacle_layer.scan.topic": ["/noblenara/", robot_codename, "/scan_filtered"],
+            "collision_monitor.ros__parameters.scan.topic": ["/noblenara/", robot_codename, "/scan_filtered"],
+            "global_costmap.global_costmap.ros__parameters.voxel_layer.pointcloud.topic": ["/noblenara/", robot_codename, "/camera_link/points"],
+            "local_costmap.local_costmap.ros__parameters.voxel_layer.pointcloud.topic": ["/noblenara/", robot_codename, "/camera_link/points"],
             "cmd_vel_in_topic": ["/noblenara/", robot_codename, "/cmd_vel/raw"],
             "cmd_vel_out_topic": ["/noblenara/", robot_codename, "/cmd_vel"],
             # Frames
