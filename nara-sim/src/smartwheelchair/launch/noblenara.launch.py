@@ -12,6 +12,12 @@ def generate_launch_description():
     
     # Namespace do Robo
     robot_codename = LaunchConfiguration("robot_codename")
+
+    # Posição de spawn (auto-offset do dashboard p/ multi-robôs;
+    # defaults mantêm o comportamento original: 0, 0, 0.1, yaw 0)
+    spawn_x = LaunchConfiguration("x")
+    spawn_y = LaunchConfiguration("y")
+    spawn_yaw = LaunchConfiguration("yaw")
     
     # Setta o resource path do Gazebo
     gazebo_resource_path = SetEnvironmentVariable(
@@ -60,9 +66,10 @@ def generate_launch_description():
         executable='create',
         arguments=['-topic', 'robot_description', 
                   '-name', ['noblenara/' , robot_codename],
-                  '-x', '0.0', 
-                  '-y', '0.0', 
-                  '-z', '0.1'],
+                  '-x', spawn_x, 
+                  '-y', spawn_y, 
+                  '-z', '0.1',
+                  '-Y', spawn_yaw],
         remappings=[ ('/robot_description', ['/noblenara/', robot_codename, '/robot_description']) ],
         output='screen'
     )
@@ -102,6 +109,9 @@ def generate_launch_description():
     return LaunchDescription([
         gazebo_resource_path,
         DeclareLaunchArgument('robot_codename', default_value='alfa'),
+        DeclareLaunchArgument('x', default_value='0.0'),
+        DeclareLaunchArgument('y', default_value='0.0'),
+        DeclareLaunchArgument('yaw', default_value='0.0'),
         robot_state_publisher_node,
         spawn_entity,
         bridge,
