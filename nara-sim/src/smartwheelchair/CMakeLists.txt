@@ -36,6 +36,8 @@ install(DIRECTORY
 # Instalar scripts Python
 install(PROGRAMS
   scripts/teleop_keyboard.py
+  scripts/smartworld/door_requester.py
+  scripts/smartworld/door_infra.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -47,6 +49,12 @@ install(PROGRAMS
 install(CODE "
   execute_process(
     COMMAND chmod +x \"\${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/teleop_keyboard.py\"
+  )
+  execute_process(
+    COMMAND chmod +x \"\${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/door_requester.py\"
+  )
+  execute_process(
+    COMMAND chmod +x \"\${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/door_infra.py\"
   )
 ")
 

@@ -1,0 +1,23 @@
+# Ponte ROS -> Gazebo dos comandos das portas (passo 3).
+# Nomes diferentes cada lado: ROS usa /smartdoor/<sala>/cmd_pos
+# (segmento /0/ do topico gz nao e valido no ROS).
+- ros_topic_name: "/smartdoor/blue/cmd_pos"
+  gz_topic_name: "/model/door_blue/joint/hinge_blue/0/cmd_pos"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+- ros_topic_name: "/smartdoor/green/cmd_pos"
+  gz_topic_name: "/model/door_green/joint/hinge_green/0/cmd_pos"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+- ros_topic_name: "/smartdoor/orange/cmd_pos"
+  gz_topic_name: "/model/door_orange/joint/hinge_orange/0/cmd_pos"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+- ros_topic_name: "/smartdoor/pink/cmd_pos"
+  gz_topic_name: "/model/door_pink/joint/hinge_pink/0/cmd_pos"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
