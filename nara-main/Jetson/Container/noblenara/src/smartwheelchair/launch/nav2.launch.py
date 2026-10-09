@@ -12,46 +12,21 @@ from nav2_common.launch import RewrittenYaml
 def generate_launch_description():
     # Setup Inicial
     pkg_share = get_package_share_directory('smartwheelchair')
-    robot_codename = LaunchConfiguration("robot_codename")
+    #robot_codename = LaunchConfiguration("robot_codename")
     params_file = LaunchConfiguration('params_file')
     map_file = LaunchConfiguration('map_file')
     
     condition=IfCondition(PythonExpression(["'", map_file, "' != 'none'"]))
     notcondition=IfCondition(PythonExpression(["'", map_file, "' == 'none'"]))
-    
-    configured_file = RewrittenYaml(
-        source_file=params_file,
-        root_key=['/noblenara/', robot_codename],
-        param_rewrites= {
-            # Tópicos
-            "odom_topic": ["/noblenara/", robot_codename, "/odom"],
-            "topic": ["/noblenara/", robot_codename, "/scan_filtered"],
-            "global_costmap.global_costmap.ros__parameters.voxel_layer.pointcloud.topic": ["/noblenara/", robot_codename, "/camera_link/points"],
-            "local_costmap.local_costmap.ros__parameters.voxel_layer.pointcloud.topic": ["/noblenara/", robot_codename, "/camera_link/points"],
-            "cmd_vel_in_topic": ["/noblenara/", robot_codename, "/cmd_vel/raw"],
-            "cmd_vel_out_topic": ["/noblenara/", robot_codename, "/cmd_vel"],
-            # Frames
-            "bt_navigator.ros__parameters.global_frame": ["noblenara/", robot_codename, "/map"],
-            "local_costmap.local_costmap.ros__parameters.global_frame": ["noblenara/", robot_codename, "/odom"],
-            "global_costmap.global_costmap.ros__parameters.global_frame": ["noblenara/", robot_codename, "/map"],
-            "behavior_server.ros__parameters.local_frame": ["noblenara/", robot_codename, "/odom"],
-            "behavior_server.ros__parameters.global_frame": ["noblenara/", robot_codename, "/map"],
-            "robot_base_frame": ["noblenara/", robot_codename, "/robot_footprint"],
-            "odom_frame_id": ["noblenara/", robot_codename, "/odom"],
-            "base_frame_id": ["noblenara/", robot_codename, "/robot_footprint"],
-            # Amcl Rewrites
-            "global_frame_id": ["noblenara/", robot_codename, "/map"],
-            "scan_topic": ["/noblenara/", robot_codename, "/scan_filtered"],
-            "map_server.ros__parameters.frame_id": ["noblenara/", robot_codename, "/map"],
-        },
-        convert_types=True
-    )
+
+    # Quando implementar múltiplos robôs colocar o rewritten YamL aqui (da mesma forma que está no launch da simulação)
+    configured_file = params_file
 
     # Nós - Nav2
     Nav2_Nodes = GroupAction(
         actions=[
-            SetParameter('use_sim_time', True),
-            PushROSNamespace(namespace=['/noblenara/', robot_codename]),
+            SetParameter('use_sim_time', False),
+            #PushROSNamespace(namespace=['/noblenara/', robot_codename]),
             
             # Publica o mapa salvo no tópico /map, para o AMCL e o costmap global
             Node(
@@ -76,7 +51,7 @@ def generate_launch_description():
                 executable='controller_server',
                 output='screen',
                 parameters=[configured_file],
-                remappings=[(['/noblenara/', robot_codename, '/cmd_vel'], ['/noblenara/', robot_codename, '/cmd_vel/raw'])],
+                remappings=[('cmd_vel', '/noblenara/cmd_vel/raw')],
             ),
             
             Node(
@@ -98,7 +73,7 @@ def generate_launch_description():
                 executable='behavior_server',
                 output='screen',
                 parameters=[configured_file],
-                remappings=[(['/noblenara/', robot_codename, '/cmd_vel'], ['/noblenara/', robot_codename, '/cmd_vel/raw'])],
+                remappings=[('cmd_vel', '/noblenara/cmd_vel/raw')],
             ),
             
             Node(
@@ -117,7 +92,7 @@ def generate_launch_description():
                 output='screen',
                 parameters=[
                             {'autostart': True},
-                            {'use_sim_time': True},
+                            {'use_sim_time': False},
                             {'node_names': [
                                 'controller_server',
                                 'planner_server',
@@ -136,7 +111,7 @@ def generate_launch_description():
                 output='screen',
                 parameters=[
                             {'autostart': True},
-                            {'use_sim_time': True},
+                            {'use_sim_time': False},
                             {'node_names': [
                                 'map_server',
                                 'amcl',
@@ -153,7 +128,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        DeclareLaunchArgument('robot_codename', default_value='alfa'),
+        #DeclareLaunchArgument('robot_codename', default_value='alfa'),
         DeclareLaunchArgument( 'params_file', default_value=os.path.join(pkg_share, 'config', 'nav2_params.yaml'), description='Caminho completo para o arquivo de parâmetros do Nav2'),
         DeclareLaunchArgument( 'map_file', default_value=os.path.join('none'), description='Caminho completo para o .yaml do mapa salvo (gerado pelo map_saver_cli)'),
         Nav2_Nodes,
