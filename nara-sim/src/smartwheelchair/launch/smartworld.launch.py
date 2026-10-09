@@ -91,7 +91,7 @@ def generate_launch_description():
     )
 
     smart_delayed = TimerAction(
-        period=8.0,
+        period=3.0,
         actions=[joint_bridge, requester, infra],
     )
 
