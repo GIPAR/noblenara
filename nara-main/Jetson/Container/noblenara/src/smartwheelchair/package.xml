@@ -11,17 +11,26 @@
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
   <depend>nav_msgs</depend>
-  <exec_depend>ros_gz_sim</exec_depend>
-  <exec_depend>ros_gz_bridge</exec_depend>
+
+  <!-- Bringup / hardware real -->
   <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>gz_ros2_control</exec_depend>
-  <exec_depend>slam_toolbox</exec_depend>
+  <exec_depend>xacro</exec_depend>
   <exec_depend>laser_filters</exec_depend>
+  <exec_depend>sllidar_ros2</exec_depend>
+
+  <!-- Fusão de sensores -->
+  <exec_depend>robot_localization</exec_depend>
+
+  <!-- SLAM -->
+  <exec_depend>slam_toolbox</exec_depend>
+
+  <!-- Nav2 -->
+  <exec_depend>navigation2</exec_depend>
+  <exec_depend>nav2_bringup</exec_depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
   <export>
     <build_type>ament_cmake</build_type>
-    <gazebo_ros gazebo_model_path="${prefix}/models"/>
-    <gazebo_ros gazebo_media_path="${prefix}/meshes"/>
   </export>
 </package>

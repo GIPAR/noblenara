@@ -58,11 +58,12 @@ global_costmap:
       global_frame: map
       robot_base_frame: robot_footprint
       resolution: 0.05
-      footprint: "[[-0.2, -0.3], [-0.2, 0.3], [0.85, 0.3], [0.85, -0.3]]"
+      #footprint: "[[-0.2, -0.3], [-0.2, 0.3], [0.85, 0.3], [0.85, -0.3]]"
+      footprint: "[[-0.2, -0.35], [-0.2, 0.35], [0.95, 0.4], [0.95, -0.4]]"
       footprint_padding: 0.05
       transform_tolerance: 0.4
 
-      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+      plugins: ["static_layer", "obstacle_layer", "voxel_layer", "inflation_layer"]
       always_send_full_costmap: true
 
       static_layer:
@@ -83,6 +84,28 @@ global_costmap:
           marking: True
           data_type: LaserScan
 
+      voxel_layer:
+        plugin: "nav2_costmap_2d::VoxelLayer"
+        enabled: true
+        footprint_clearing_enabled: true
+        max_obstacle_height: 2.0
+        z_voxels: 16 #os obstaculos que será a multiplicação entre z_voxels e z_resolution, ou seja, 16 * 0.125 = 2.0m)
+        z_resolution: 0.125
+        unknown_threshold: 15
+        mark_threshold: 0
+        publish_voxel_map: true
+        observation_sources: pointcloud
+        pointcloud:
+          topic: /noblenara/camera_link/points
+          max_obstacle_height: 2.0
+          min_obstacle_height: 0.1
+          clearing: True
+          marking: True
+          data_type: PointCloud2
+          obstacle_max_range: 5.0
+          raytrace_max_range: 5.5
+          obstacle_min_range: 0.9
+
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
@@ -100,15 +123,14 @@ local_costmap:
       height: 6
       resolution: 0.05
       rolling_window: true
-
-      footprint: "[[-0.2, -0.3], [-0.2, 0.3], [0.85, 0.3], [0.85, -0.3]]"
+      #footprint: "[[-0.2, -0.3], [-0.2, 0.3], [0.85, 0.3], [0.85, -0.3]]"
+      footprint: "[[-0.2, -0.35], [-0.2, 0.35], [0.95, 0.4], [0.95, -0.4]]"
       footprint_padding: 0.05
 
       update_frequency: 10.0
       publish_frequency: 10.0
 
-
-      plugins: ["obstacle_layer", "inflation_layer"]
+      plugins: ["obstacle_layer", "voxel_layer", "inflation_layer"]
       always_send_full_costmap: true
 
       obstacle_layer:
@@ -123,6 +145,29 @@ local_costmap:
           clearing: True
           marking: True
           data_type: LaserScan
+
+
+      voxel_layer:
+        plugin: "nav2_costmap_2d::VoxelLayer"
+        enabled: true
+        footprint_clearing_enabled: true
+        max_obstacle_height: 2.0
+        z_voxels: 16
+        z_resolution: 0.125
+        unknown_threshold: 15
+        mark_threshold: 0
+        publish_voxel_map: true
+        observation_sources: pointcloud
+        pointcloud:
+          topic: /noblenara/camera_link/points
+          max_obstacle_height: 2.0
+          min_obstacle_height: 0.1
+          clearing: True
+          marking: True
+          data_type: PointCloud2
+          obstacle_max_range: 4.0
+          raytrace_max_range: 4.5
+          obstacle_min_range: 0.9
 
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"

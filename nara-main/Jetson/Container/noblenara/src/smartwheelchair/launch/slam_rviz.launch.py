@@ -35,7 +35,7 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(slam_launch),
             launch_arguments={
                 'slam_params_file': config_file,
-                'use_sim_time': 'true'
+                'use_sim_time': 'false'
             }.items()
         ),
 
@@ -44,7 +44,7 @@ def generate_launch_description():
             executable='rviz2',
             name='rviz2',
             arguments=['-d', rviz_config_file],
-            parameters=[{'use_sim_time': True}],
+            parameters=[{'use_sim_time': False}],
             output='screen'
         )
 

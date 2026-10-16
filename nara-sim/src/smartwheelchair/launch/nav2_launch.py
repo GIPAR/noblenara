@@ -26,6 +26,8 @@ def generate_launch_description():
             # Tópicos
             "odom_topic": ["/noblenara/", robot_codename, "/odom"],
             "topic": ["/noblenara/", robot_codename, "/scan_filtered"],
+            "global_costmap.global_costmap.ros__parameters.voxel_layer.pointcloud.topic": ["/noblenara/", robot_codename, "/camera_link/points"],
+            "local_costmap.local_costmap.ros__parameters.voxel_layer.pointcloud.topic": ["/noblenara/", robot_codename, "/camera_link/points"],
             "cmd_vel_in_topic": ["/noblenara/", robot_codename, "/cmd_vel/raw"],
             "cmd_vel_out_topic": ["/noblenara/", robot_codename, "/cmd_vel"],
             # Frames

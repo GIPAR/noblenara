@@ -137,7 +137,7 @@
         <visual name='visual'>
           <geometry>
             <mesh>
-              <uri>file:///home/giovane/noblenara/nara-sim/src/smartwheelchair/models/person_standing/meshes/standing.dae</uri>
+              <uri>model://person_standing/meshes/standing.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
