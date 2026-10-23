@@ -249,21 +249,21 @@
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_blue_doorwall_a_col">
-        <pose>9.5 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>9.45 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_blue_doorwall_a_vis">
-        <pose>9.5 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>9.45 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_blue_doorwall_b_col">
-        <pose>12.5 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>12.55 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_blue_doorwall_b_vis">
-        <pose>12.5 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>12.55 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_blue_backwall_col">
@@ -294,21 +294,21 @@
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_green_doorwall_a_col">
-        <pose>9.5 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>9.45 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_green_doorwall_a_vis">
-        <pose>9.5 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>9.45 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_green_doorwall_b_col">
-        <pose>12.5 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>12.55 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_green_doorwall_b_vis">
-        <pose>12.5 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>12.55 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_green_backwall_col">
@@ -339,21 +339,21 @@
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_orange_doorwall_a_col">
-        <pose>16.5 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>16.45 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_orange_doorwall_a_vis">
-        <pose>16.5 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>16.45 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_orange_doorwall_b_col">
-        <pose>19.5 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>19.55 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_orange_doorwall_b_vis">
-        <pose>19.5 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>19.55 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_orange_backwall_col">
@@ -384,21 +384,21 @@
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_pink_doorwall_a_col">
-        <pose>16.5 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>16.45 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_pink_doorwall_a_vis">
-        <pose>16.5 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>16.45 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_pink_doorwall_b_col">
-        <pose>19.5 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>19.55 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_pink_doorwall_b_vis">
-        <pose>19.5 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>2.0 0.2 2.5</size></box></geometry>
+        <pose>19.55 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_pink_backwall_col">
@@ -463,47 +463,47 @@
       <link name="lintels">
       <collision name="lintel_blue_col">
         <pose>11 2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
       </collision>
       <visual name="lintel_blue_vis">
         <pose>11 2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="lintel_green_col">
         <pose>11 -2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
       </collision>
       <visual name="lintel_green_vis">
         <pose>11 -2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="lintel_orange_col">
         <pose>18 2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
       </collision>
       <visual name="lintel_orange_vis">
         <pose>18 2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="lintel_pink_col">
         <pose>18 -2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
       </collision>
       <visual name="lintel_pink_vis">
         <pose>18 -2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.0 0.2 0.4</size></box></geometry>
+        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       </link>
     </model>
 
-    <!-- ===== PORTA BLUE (giratoria, folha 0.94 azul; abre p/ dentro da sala) ===== -->
+    <!-- ===== PORTA BLUE (giratoria, folha 1.08 azul; abre p/ dentro da sala) ===== -->
     <model name='door_blue'>
       <link name='jamb_left'>
-        <pose>10.55 2.0 0 0 0 0</pose>
+        <pose>10.45 2.0 0 0 0 0</pose>
         <inertial>
           <mass>2.0</mass>
           <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
@@ -535,18 +535,18 @@
         </visual>
       </link>
       <link name='leaf'>
-        <pose>10.55 2.0 0 0 0 0</pose>
+        <pose>10.45 2.0 0 0 0 0</pose>
         <inertial>
           <mass>5.0</mass>
-          <inertia><ixx>1.84</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.21</iyy><iyz>0</iyz><izz>0.37</izz></inertia>
+          <inertia><ixx>2.02</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.56</iyy><iyz>0</iyz><izz>0.54</izz></inertia>
         </inertial>
         <collision name='col'>
-          <pose>0.47 0 1.05 0 0 0</pose>
-          <geometry><box><size>0.94 0.08 2.1</size></box></geometry>
+          <pose>0.54 0 1.05 0 0 0</pose>
+          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
         </collision>
         <visual name='vis'>
-          <pose>0.47 0 1.05 0 0 0</pose>
-          <geometry><box><size>0.94 0.08 2.1</size></box></geometry>
+          <pose>0.54 0 1.05 0 0 0</pose>
+          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
           <material><ambient>0.1 0.45 1 1</ambient><diffuse>0.1 0.45 1 1</diffuse></material>
         </visual>
         <visual name='hinge_barrel'>
@@ -584,10 +584,10 @@
     </model>
 
 
-    <!-- ===== PORTA GREEN (giratoria, folha 0.94 verde; abre p/ dentro da sala) ===== -->
+    <!-- ===== PORTA GREEN (giratoria, folha 1.08 verde; abre p/ dentro da sala) ===== -->
     <model name='door_green'>
       <link name='jamb_left'>
-        <pose>10.55 -2.0 0 0 0 0</pose>
+        <pose>10.45 -2.0 0 0 0 0</pose>
         <inertial>
           <mass>2.0</mass>
           <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
@@ -619,18 +619,18 @@
         </visual>
       </link>
       <link name='leaf'>
-        <pose>10.55 -2.0 0 0 0 0</pose>
+        <pose>10.45 -2.0 0 0 0 0</pose>
         <inertial>
           <mass>5.0</mass>
-          <inertia><ixx>1.84</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.21</iyy><iyz>0</iyz><izz>0.37</izz></inertia>
+          <inertia><ixx>2.02</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.56</iyy><iyz>0</iyz><izz>0.54</izz></inertia>
         </inertial>
         <collision name='col'>
-          <pose>0.47 0 1.05 0 0 0</pose>
-          <geometry><box><size>0.94 0.08 2.1</size></box></geometry>
+          <pose>0.54 0 1.05 0 0 0</pose>
+          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
         </collision>
         <visual name='vis'>
-          <pose>0.47 0 1.05 0 0 0</pose>
-          <geometry><box><size>0.94 0.08 2.1</size></box></geometry>
+          <pose>0.54 0 1.05 0 0 0</pose>
+          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
           <material><ambient>0.1 0.75 0.3 1</ambient><diffuse>0.1 0.75 0.3 1</diffuse></material>
         </visual>
         <visual name='hinge_barrel'>
@@ -668,10 +668,10 @@
     </model>
 
 
-    <!-- ===== PORTA ORANGE (giratoria, folha 0.94 laranja; abre p/ dentro da sala) ===== -->
+    <!-- ===== PORTA ORANGE (giratoria, folha 1.08 laranja; abre p/ dentro da sala) ===== -->
     <model name='door_orange'>
       <link name='jamb_left'>
-        <pose>17.55 2.0 0 0 0 0</pose>
+        <pose>17.45 2.0 0 0 0 0</pose>
         <inertial>
           <mass>2.0</mass>
           <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
@@ -703,18 +703,18 @@
         </visual>
       </link>
       <link name='leaf'>
-        <pose>17.55 2.0 0 0 0 0</pose>
+        <pose>17.45 2.0 0 0 0 0</pose>
         <inertial>
           <mass>5.0</mass>
-          <inertia><ixx>1.84</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.21</iyy><iyz>0</iyz><izz>0.37</izz></inertia>
+          <inertia><ixx>2.02</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.56</iyy><iyz>0</iyz><izz>0.54</izz></inertia>
         </inertial>
         <collision name='col'>
-          <pose>0.47 0 1.05 0 0 0</pose>
-          <geometry><box><size>0.94 0.08 2.1</size></box></geometry>
+          <pose>0.54 0 1.05 0 0 0</pose>
+          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
         </collision>
         <visual name='vis'>
-          <pose>0.47 0 1.05 0 0 0</pose>
-          <geometry><box><size>0.94 0.08 2.1</size></box></geometry>
+          <pose>0.54 0 1.05 0 0 0</pose>
+          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
           <material><ambient>1 0.55 0.1 1</ambient><diffuse>1 0.55 0.1 1</diffuse></material>
         </visual>
         <visual name='hinge_barrel'>
@@ -752,10 +752,10 @@
     </model>
 
 
-    <!-- ===== PORTA PINK (giratoria, folha 0.94 rosa; abre p/ dentro da sala) ===== -->
+    <!-- ===== PORTA PINK (giratoria, folha 1.08 rosa; abre p/ dentro da sala) ===== -->
     <model name='door_pink'>
       <link name='jamb_left'>
-        <pose>17.55 -2.0 0 0 0 0</pose>
+        <pose>17.45 -2.0 0 0 0 0</pose>
         <inertial>
           <mass>2.0</mass>
           <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
@@ -787,18 +787,18 @@
         </visual>
       </link>
       <link name='leaf'>
-        <pose>17.55 -2.0 0 0 0 0</pose>
+        <pose>17.45 -2.0 0 0 0 0</pose>
         <inertial>
           <mass>5.0</mass>
-          <inertia><ixx>1.84</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.21</iyy><iyz>0</iyz><izz>0.37</izz></inertia>
+          <inertia><ixx>2.02</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.56</iyy><iyz>0</iyz><izz>0.54</izz></inertia>
         </inertial>
         <collision name='col'>
-          <pose>0.47 0 1.05 0 0 0</pose>
-          <geometry><box><size>0.94 0.08 2.1</size></box></geometry>
+          <pose>0.54 0 1.05 0 0 0</pose>
+          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
         </collision>
         <visual name='vis'>
-          <pose>0.47 0 1.05 0 0 0</pose>
-          <geometry><box><size>0.94 0.08 2.1</size></box></geometry>
+          <pose>0.54 0 1.05 0 0 0</pose>
+          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
           <material><ambient>1 0.15 0.55 1</ambient><diffuse>1 0.15 0.55 1</diffuse></material>
         </visual>
         <visual name='hinge_barrel'>

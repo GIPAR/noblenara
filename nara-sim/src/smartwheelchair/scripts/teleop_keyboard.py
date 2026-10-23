@@ -68,6 +68,9 @@ modo_velocidade = "Normal"
 menu_modos_aberto = False
 editando_topico = False
 topico_input = current_topic
+
+# True = último estado publicado/assumido foi parado (evita publicar zero ao abrir)
+ultimo_era_zero = True
  
 # Cor neon mais pura (menos verde)
 AZUL_NARA = (0, 245, 255)
@@ -327,11 +330,14 @@ while True:
     # Botão de Aceleração/Desaceleração (canto superior esquerdo)
     desenhar_botao_aceleracao(tela, usar_aceleracao)
  
-    # Publicar
-    msg = Twist()
-    msg.linear.x = float(linear)
-    msg.angular.z = float(angular)
-    pub.publish(msg)
+    # Publicar (só quando há movimento, ou uma única vez ao parar)
+    em_movimento = (linear != 0.0 or angular != 0.0)
+    if em_movimento or not ultimo_era_zero:
+        msg = Twist()
+        msg.linear.x = float(linear)
+        msg.angular.z = float(angular)
+        pub.publish(msg)
+    ultimo_era_zero = not em_movimento
  
     rclpy.spin_once(node, timeout_sec=0)
     pygame.display.flip()
