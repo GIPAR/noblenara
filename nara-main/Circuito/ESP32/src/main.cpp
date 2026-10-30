@@ -2,6 +2,7 @@
 #include <micro_ros_platformio.h>
 #include "noblenara_config.h"
 #include <noblenara_interface/srv/set_pid.h>
+#include <noblenara_interface/msg/wheel_telemetry.h>
 
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
@@ -39,6 +40,17 @@ rcl_timer_t timer_watchdog;
 rcl_publisher_t battery_pub;
 sensor_msgs__msg__BatteryState battery_msg;
 rcl_timer_t timer_battery;
+
+rcl_publisher_t wheel_telemetry_pub;
+noblenara_interface__msg__WheelTelemetry wheel_telemetry_msg;
+bool wheel_telemetry_ready = false;
+bool command_received = false;
+bool watchdog_active = false;
+uint32_t control_sequence = 0;
+uint32_t previous_cycle_duration_us = 0;
+uint32_t telemetry_publish_failures = 0;
+unsigned long last_telemetry_publish_ms = 0;
+unsigned long command_age_ms = 0;
 
 rcl_service_t pid_service;
 const rosidl_service_type_support_t * type_support = ROSIDL_GET_SRV_TYPE_SUPPORT(noblenara_interface, srv, SetPID);
@@ -90,11 +102,14 @@ QuickPID pidRight(&input_right, &output_right, &setpoint_right,
 float lkp_live, lkd_live, lki_live; // Variáveis para Mudança de PID Dinâmicas
 float rkp_live, rkd_live, rki_live;
 
-void callback_watchdog();
+void callback_watchdog(rcl_timer_t * timer, int64_t last_call_time);
 void callback_encoder();
 void callback_imu();
-void callback_battery();
-void service_callback();
+void callback_battery(rcl_timer_t * timer, int64_t last_call_time);
+void service_callback(const void * request_msg, void * response_msg);
+void callback_cmd_vel(const void * msgin);
+void callback_motorcontrol();
+void callback_wheel_telemetry(uint32_t elapsed_before_telemetry_us);
 
 
 //=============================================================================
@@ -102,6 +117,7 @@ void service_callback();
 
 void callback_cmd_vel(const void * msgin){
   watchdog_cmdvel = millis();
+  command_received = true;
 
   geometry_msgs__msg__Twist * msg = (geometry_msgs__msg__Twist *) msgin;
   targetlinearVel = msg->linear.x;
@@ -123,29 +139,40 @@ void callback_motorcontrol(){
     // ====================================================================
     // ZONA MORTA DINÂMICA INDEPENDENTE (Compensação de Assimetria)
     
-    float DEADBAND_LEFT = 20.0;  
-    float DEADBAND_RIGHT = 23.5; 
+    float DEADBAND_LEFT = 20;  
+    float DEADBAND_RIGHT = 22.5; 
 
     float final_pwm_left = output_left;
     float final_pwm_right = output_right;
+    wheel_telemetry_msg.minimum_pwm_applied[0] = false;
+    wheel_telemetry_msg.minimum_pwm_applied[1] = false;
+    //float final_pwm_left = 60.0;
+    //float final_pwm_right = 60.0;
 
     // Compensação da Roda Esquerda
+    
     if (setpoint_left > 0.05 && output_left < DEADBAND_LEFT && output_left > 0) {
         final_pwm_left = DEADBAND_LEFT;
+        wheel_telemetry_msg.minimum_pwm_applied[0] = true;
     } else if (setpoint_left < -0.05 && output_left > -DEADBAND_LEFT && output_left < 0) {
         final_pwm_left = -DEADBAND_LEFT;
+        wheel_telemetry_msg.minimum_pwm_applied[0] = true;
     }
 
     // Compensação da Roda Direita (O motor problemático)
     if (setpoint_right > 0.05 && output_right < DEADBAND_RIGHT && output_right > 0) {
         final_pwm_right = DEADBAND_RIGHT;
+        wheel_telemetry_msg.minimum_pwm_applied[1] = true;
     } else if (setpoint_right < -0.05 && output_right > -DEADBAND_RIGHT && output_right < 0) {
         final_pwm_right = -DEADBAND_RIGHT;
+        wheel_telemetry_msg.minimum_pwm_applied[1] = true;
     }
-
+    
     // Desliga totalmente se o alvo for zero (Segurança)
     if (fabs(setpoint_left) < 0.01) final_pwm_left = 0.0;
     if (fabs(setpoint_right) < 0.01) final_pwm_right = 0.0;
+    wheel_telemetry_msg.zero_target_override[0] = fabs(setpoint_left) < 0.01;
+    wheel_telemetry_msg.zero_target_override[1] = fabs(setpoint_right) < 0.01;
     // ====================================================================
 
     // Motor direito (Usando o PWM compensado)
@@ -169,6 +196,34 @@ void callback_motorcontrol(){
       mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, fabs(final_pwm_left));
       mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, MCPWM_DUTY_MODE_0);
     }
+
+    // Snapshot apos aplicar o PWM, sem publicar nem alocar memoria aqui.
+    wheel_telemetry_msg.target_mps[0] = setpoint_left;
+    wheel_telemetry_msg.target_mps[1] = setpoint_right;
+    wheel_telemetry_msg.measured_mps[0] = input_left;
+    wheel_telemetry_msg.measured_mps[1] = input_right;
+    wheel_telemetry_msg.error_mps[0] = setpoint_left - input_left;
+    wheel_telemetry_msg.error_mps[1] = setpoint_right - input_right;
+    wheel_telemetry_msg.pid_output_pct[0] = output_left;
+    wheel_telemetry_msg.pid_output_pct[1] = output_right;
+    wheel_telemetry_msg.applied_pwm_pct[0] = final_pwm_left;
+    wheel_telemetry_msg.applied_pwm_pct[1] = final_pwm_right;
+    wheel_telemetry_msg.p_term_pct[0] = pidLeft.GetPterm();
+    wheel_telemetry_msg.p_term_pct[1] = pidRight.GetPterm();
+    wheel_telemetry_msg.i_term_pct[0] = pidLeft.GetIterm();
+    wheel_telemetry_msg.i_term_pct[1] = pidRight.GetIterm();
+    wheel_telemetry_msg.d_term_pct[0] = pidLeft.GetDterm();
+    wheel_telemetry_msg.d_term_pct[1] = pidRight.GetDterm();
+    wheel_telemetry_msg.output_sum_pct[0] = pidLeft.GetOutputSum();
+    wheel_telemetry_msg.output_sum_pct[1] = pidRight.GetOutputSum();
+    wheel_telemetry_msg.kp[0] = pidLeft.GetKp();
+    wheel_telemetry_msg.kp[1] = pidRight.GetKp();
+    wheel_telemetry_msg.ki[0] = pidLeft.GetKi();
+    wheel_telemetry_msg.ki[1] = pidRight.GetKi();
+    wheel_telemetry_msg.kd[0] = pidLeft.GetKd();
+    wheel_telemetry_msg.kd[1] = pidRight.GetKd();
+    wheel_telemetry_msg.pid_at_output_limit[0] = fabs(output_left) >= PWM_MAX;
+    wheel_telemetry_msg.pid_at_output_limit[1] = fabs(output_right) >= PWM_MAX;
 }
 
 
@@ -195,6 +250,8 @@ void callback_encoder(){
   // Velocidades reais para o PID (m/s)
   linearVel  = newCenter / dt;
   angularVel = ((newRight - newLeft) / WHEEL_LR_DISTANCE) / dt;
+  float velLeft = newLeft / dt;
+  float velRight = newRight / dt;
 
   // Acúmulo de posição para o EKF/SLAM
   theta = theta + ((newRight - newLeft) / WHEEL_LR_DISTANCE);
@@ -217,10 +274,8 @@ void callback_encoder(){
   encoder_msg.pose.pose.orientation.w = cos(theta / 2.0);
   
   encoder_msg.twist.twist.linear.x = linearVel;
-  encoder_msg.twist.twist.linear.y = 0.0;
-  encoder_msg.twist.twist.linear.z = 0.0;
-  // encoder_msg.twist.twist.linear.y = input_left; // Para debug de Encoders
-  // encoder_msg.twist.twist.linear.z = input_right;
+  encoder_msg.twist.twist.linear.y = velLeft;
+  encoder_msg.twist.twist.linear.z = velRight;
   
   encoder_msg.twist.twist.angular.x = 0.0;
   encoder_msg.twist.twist.angular.y = 0.0;
@@ -229,10 +284,7 @@ void callback_encoder(){
   rcl_ret_t ret = rcl_publish(&encoder_pub, &encoder_msg, NULL);
 
   if (ret != RCL_RET_OK) {
-    // mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A);
-    // mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B);
-    // mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_A);
-    // mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_GEN_B);
+    // Falha ao publicar odometria — mantém motores no estado atual
   }
 }
 
@@ -329,7 +381,10 @@ void service_callback(const void * request_msg, void * response_msg){
 void callback_watchdog(rcl_timer_t * timer, int64_t last_call_time){
   if (timer == NULL) return;
 
-  if (millis() - watchdog_cmdvel >= CMD_TIMEOUT_MS){
+  const uint32_t cycle_start_us = micros();
+  command_age_ms = millis() - watchdog_cmdvel;
+  watchdog_active = command_age_ms >= CMD_TIMEOUT_MS;
+  if (watchdog_active){
     targetleftVel  = 0.0;
     targetrightVel = 0.0;
     pidLeft.Reset();
@@ -343,6 +398,35 @@ void callback_watchdog(rcl_timer_t * timer, int64_t last_call_time){
   callback_encoder();
   callback_imu();
   callback_motorcontrol();
+  ++control_sequence;
+  callback_wheel_telemetry(micros() - cycle_start_us);
+  previous_cycle_duration_us = micros() - cycle_start_us;
+}
+
+void callback_wheel_telemetry(uint32_t elapsed_before_telemetry_us){
+  if (!wheel_telemetry_ready) return;
+  const unsigned long now = millis();
+  if (now - last_telemetry_publish_ms < WHEEL_TELEMETRY_PUBLISH_RATE) return;
+  last_telemetry_publish_ms = now;
+
+  wheel_telemetry_msg.stamp = encoder_msg.header.stamp;
+  wheel_telemetry_msg.sequence = control_sequence;
+  wheel_telemetry_msg.uptime_ms = timehelper;
+  wheel_telemetry_msg.command_age_ms = command_age_ms;
+  wheel_telemetry_msg.command_received = command_received;
+  wheel_telemetry_msg.watchdog_active = watchdog_active;
+  wheel_telemetry_msg.time_synchronized = rmw_uros_epoch_synchronized();
+  wheel_telemetry_msg.control_dt_s = dt;
+  wheel_telemetry_msg.previous_cycle_duration_us = previous_cycle_duration_us;
+  wheel_telemetry_msg.cycle_duration_before_telemetry_us = elapsed_before_telemetry_us;
+  wheel_telemetry_msg.telemetry_publish_failures = telemetry_publish_failures;
+  wheel_telemetry_msg.command_linear_mps = targetlinearVel;
+  wheel_telemetry_msg.command_angular_radps = targetangularVel;
+
+  // Best effort: a telemetria nao espera confirmacao DDS do agente.
+  if (rcl_publish(&wheel_telemetry_pub, &wheel_telemetry_msg, NULL) != RCL_RET_OK) {
+    ++telemetry_publish_failures;
+  }
 }
 
 
@@ -455,6 +539,7 @@ void setup() {
   sensor_msgs__msg__Imu__init(&imu_msg);
   noblenara_interface__srv__SetPID_Request__init(&pid_request_msg);
   noblenara_interface__srv__SetPID_Response__init(&pid_response_msg);
+  noblenara_interface__msg__WheelTelemetry__init(&wheel_telemetry_msg);
 
   // Setup das Mensagens - Precisa inicializar na ordem correta
   static char service_buffer[20]; // Ensure this is large enough for your longest message
@@ -516,6 +601,13 @@ void setup() {
   );
 
   rclc_service_init_default( &pid_service, &node, type_support, SetPID_SERVICE);
+
+  wheel_telemetry_ready = rclc_publisher_init_best_effort(
+    &wheel_telemetry_pub,
+    &node,
+    ROSIDL_GET_MSG_TYPE_SUPPORT(noblenara_interface, msg, WheelTelemetry),
+    WHEEL_TELEMETRY_TOPIC
+  ) == RCL_RET_OK;
 
   // Timer e Executor
   rclc_timer_init_default2(&timer_watchdog, &support, RCL_MS_TO_NS(WATCHDOG_PUBLISH_RATE), callback_watchdog, true);

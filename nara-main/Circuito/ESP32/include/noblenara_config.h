@@ -47,13 +47,13 @@
 #define MOTOR_RIGHT_LPWM 27
 #define MOTOR_RIGHT_RPWM 14
 
-#define lK_P 30.0  // P Left
-#define lK_I 0.0   // I
-#define lK_D 0.3   // D
+#define lK_P 25.0     // P Left
+#define lK_I 30.0  // I
+#define lK_D 0.0     // D
 
-#define rK_P 30.0  // P Right
-#define rK_I 0.0   // I
-#define rK_D 0.3   // D
+#define rK_P 25.0     // P Right
+#define rK_I 30.0  // I
+#define rK_D 0.0     // D
 
 //=============================================================================
 // CONFIGURAÇÕES DA BATERIA
@@ -71,12 +71,15 @@
 // Taxas de Publicação (ms)
 #define WATCHDOG_PUBLISH_RATE 20
 #define BATTERY_PUBLISH_RATE 1000
+// Telemetria apos o acionamento dos motores. 20 ms = nominalmente 50 Hz.
+#define WHEEL_TELEMETRY_PUBLISH_RATE 20
 
 // ROS2 Topic Names
 #define ODOM_TOPIC "/noblenara/odom"
 #define IMU_TOPIC "/noblenara/imu/data"
 #define CMD_VEL_TOPIC "/noblenara/cmd_vel"
 #define BATTERY_TOPIC "/noblenara/battery_status"
+#define WHEEL_TELEMETRY_TOPIC "/noblenara/wheel_telemetry"
 
 // ROS2 Service Names
 #define SetPID_SERVICE "/noblenara/set_pid"
