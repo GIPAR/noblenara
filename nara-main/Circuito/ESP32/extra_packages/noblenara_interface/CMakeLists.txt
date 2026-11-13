@@ -8,10 +8,16 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(builtin_interfaces REQUIRED)
 # Place the dependencies for the messages : Also required in the Package.xml
 # find_package(geometry_msgs REQUIRED)
 
-rosidl_generate_interfaces(${PROJECT_NAME} "srv/SetPID.srv")
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "srv/SetPID.srv"
+  "msg/WheelTelemetry.msg"
+  DEPENDENCIES builtin_interfaces
+)
+ament_export_dependencies(rosidl_default_runtime)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
