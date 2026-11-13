@@ -43,14 +43,6 @@ rcl_timer_t timer_battery;
 
 rcl_publisher_t wheel_telemetry_pub;
 noblenara_interface__msg__WheelTelemetry wheel_telemetry_msg;
-bool wheel_telemetry_ready = false;
-bool command_received = false;
-bool watchdog_active = false;
-uint32_t control_sequence = 0;
-uint32_t previous_cycle_duration_us = 0;
-uint32_t telemetry_publish_failures = 0;
-unsigned long last_telemetry_publish_ms = 0;
-unsigned long command_age_ms = 0;
 
 rcl_service_t pid_service;
 const rosidl_service_type_support_t * type_support = ROSIDL_GET_SRV_TYPE_SUPPORT(noblenara_interface, srv, SetPID);
@@ -74,6 +66,15 @@ double newCenter = 0;
 double posX = 0.0;                // Variáveis para odometria
 double posY = 0.0;
 double theta = 0.0;
+
+bool wheel_telemetry_ready = false; // Variáveis da WheelTelemetry
+bool command_received = false;
+bool watchdog_active = false;
+uint32_t control_sequence = 0;
+uint32_t previous_cycle_duration_us = 0;
+uint32_t telemetry_publish_failures = 0;
+unsigned long last_telemetry_publish_ms = 0;
+unsigned long command_age_ms = 0;
 
 double linearVel = 0.0;           // Variáveis de velocidade
 double angularVel = 0.0;
@@ -146,11 +147,8 @@ void callback_motorcontrol(){
     float final_pwm_right = output_right;
     wheel_telemetry_msg.minimum_pwm_applied[0] = false;
     wheel_telemetry_msg.minimum_pwm_applied[1] = false;
-    //float final_pwm_left = 60.0;
-    //float final_pwm_right = 60.0;
 
     // Compensação da Roda Esquerda
-    
     if (setpoint_left > 0.05 && output_left < DEADBAND_LEFT && output_left > 0) {
         final_pwm_left = DEADBAND_LEFT;
         wheel_telemetry_msg.minimum_pwm_applied[0] = true;
@@ -274,8 +272,10 @@ void callback_encoder(){
   encoder_msg.pose.pose.orientation.w = cos(theta / 2.0);
   
   encoder_msg.twist.twist.linear.x = linearVel;
-  encoder_msg.twist.twist.linear.y = velLeft;
-  encoder_msg.twist.twist.linear.z = velRight;
+  encoder_msg.twist.twist.linear.y = 0.0;
+  encoder_msg.twist.twist.linear.z = 0.0;
+  //encoder_msg.twist.twist.linear.y = velLeft;
+  //encoder_msg.twist.twist.linear.z = velRight;
   
   encoder_msg.twist.twist.angular.x = 0.0;
   encoder_msg.twist.twist.angular.y = 0.0;
@@ -602,12 +602,16 @@ void setup() {
 
   rclc_service_init_default( &pid_service, &node, type_support, SetPID_SERVICE);
 
-  wheel_telemetry_ready = rclc_publisher_init_best_effort(
+  rcl_ret_t ret = rclc_publisher_init_default(
     &wheel_telemetry_pub,
     &node,
-    ROSIDL_GET_MSG_TYPE_SUPPORT(noblenara_interface, msg, WheelTelemetry),
+    ROSIDL_GET_MSG_TYPE_SUPPORT(
+        noblenara_interface, msg, WheelTelemetry
+    ),
     WHEEL_TELEMETRY_TOPIC
-  ) == RCL_RET_OK;
+);
+
+wheel_telemetry_ready = (ret == RCL_RET_OK);
 
   // Timer e Executor
   rclc_timer_init_default2(&timer_watchdog, &support, RCL_MS_TO_NS(WATCHDOG_PUBLISH_RATE), callback_watchdog, true);
