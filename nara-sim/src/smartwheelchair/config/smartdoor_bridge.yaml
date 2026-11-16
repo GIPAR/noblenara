@@ -21,3 +21,25 @@
   ros_type_name: "std_msgs/msg/Float64"
   gz_type_name: "gz.msgs.Double"
   direction: ROS_TO_GZ
+
+# Retorno real das juntas: a infraestrutura só confirma após medir o ângulo.
+- ros_topic_name: "/smartdoor/blue/joint_states"
+  gz_topic_name: "/smartdoor/blue/joint_states"
+  ros_type_name: "sensor_msgs/msg/JointState"
+  gz_type_name: "gz.msgs.Model"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/smartdoor/green/joint_states"
+  gz_topic_name: "/smartdoor/green/joint_states"
+  ros_type_name: "sensor_msgs/msg/JointState"
+  gz_type_name: "gz.msgs.Model"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/smartdoor/orange/joint_states"
+  gz_topic_name: "/smartdoor/orange/joint_states"
+  ros_type_name: "sensor_msgs/msg/JointState"
+  gz_type_name: "gz.msgs.Model"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/smartdoor/pink/joint_states"
+  gz_topic_name: "/smartdoor/pink/joint_states"
+  ros_type_name: "sensor_msgs/msg/JointState"
+  gz_type_name: "gz.msgs.Model"
+  direction: GZ_TO_ROS

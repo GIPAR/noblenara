@@ -21,6 +21,9 @@ setup(
     entry_points={
         'console_scripts': [
             'teleop_keyboard = smartwheelchair.teleop_keyboard:main',
+            'door_requester = smartwheelchair.smartworld.door_requester:main',
+            'door_infra = smartwheelchair.smartworld.door_infra:main',
+            'door_map_publisher = smartwheelchair.smartworld.door_map_publisher:main',
         ],
     },
 )

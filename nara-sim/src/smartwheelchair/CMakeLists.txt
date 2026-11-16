@@ -38,8 +38,11 @@ install(PROGRAMS
   scripts/teleop_keyboard.py
   scripts/smartworld/door_requester.py
   scripts/smartworld/door_infra.py
+  scripts/smartworld/door_map_publisher.py
   DESTINATION lib/${PROJECT_NAME}
 )
+
+install(FILES scripts/smartworld/service_routes.py DESTINATION lib/${PROJECT_NAME})
 
 # Instalar módulos Python
 #ament_python_install_package(${PROJECT_NAME})
@@ -55,6 +58,9 @@ install(CODE "
   )
   execute_process(
     COMMAND chmod +x \"\${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/door_infra.py\"
+  )
+  execute_process(
+    COMMAND chmod +x \"\${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/door_map_publisher.py\"
   )
 ")
 

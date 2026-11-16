@@ -106,7 +106,7 @@
 
     <!-- Mundo para integracao com ambientes inteligentes:
          Lobby + corredor + 4 salas, sem pessoas e sem checkpoints.
-         Vaos de porta de 2m preparados para porta automatica futura. -->
+         Vaos livres de 2m entre batentes, com portas automaticas de 2m. -->
     <model name='corridor_rooms'>
       <static>true</static>
       <link name="link">
@@ -186,57 +186,57 @@
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="corridor_north_0_col">
-        <pose>5.0 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>10.0 0.2 2.5</size></box></geometry>
+        <pose>4.95 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>9.9 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="corridor_north_0_vis">
-        <pose>5.0 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>10.0 0.2 2.5</size></box></geometry>
+        <pose>4.95 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>9.9 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="corridor_north_1_col">
         <pose>14.5 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+        <geometry><box><size>4.8 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="corridor_north_1_vis">
         <pose>14.5 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+        <geometry><box><size>4.8 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="corridor_north_2_col">
-        <pose>20.5 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>3.0 0.2 2.5</size></box></geometry>
+        <pose>20.55 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.9 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="corridor_north_2_vis">
-        <pose>20.5 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>3.0 0.2 2.5</size></box></geometry>
+        <pose>20.55 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.9 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="corridor_south_0_col">
-        <pose>5.0 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>10.0 0.2 2.5</size></box></geometry>
+        <pose>4.95 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>9.9 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="corridor_south_0_vis">
-        <pose>5.0 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>10.0 0.2 2.5</size></box></geometry>
+        <pose>4.95 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>9.9 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="corridor_south_1_col">
         <pose>14.5 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+        <geometry><box><size>4.8 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="corridor_south_1_vis">
         <pose>14.5 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>5.0 0.2 2.5</size></box></geometry>
+        <geometry><box><size>4.8 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="corridor_south_2_col">
-        <pose>20.5 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>3.0 0.2 2.5</size></box></geometry>
+        <pose>20.55 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.9 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="corridor_south_2_vis">
-        <pose>20.5 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>3.0 0.2 2.5</size></box></geometry>
+        <pose>20.55 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>2.9 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="corridor_east_end_col">
@@ -249,21 +249,21 @@
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_blue_doorwall_a_col">
-        <pose>9.45 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>9.2 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_blue_doorwall_a_vis">
-        <pose>9.45 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>9.2 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_blue_doorwall_b_col">
-        <pose>12.55 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>12.8 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_blue_doorwall_b_vis">
-        <pose>12.55 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>12.8 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_blue_backwall_col">
@@ -294,21 +294,21 @@
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_green_doorwall_a_col">
-        <pose>9.45 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>9.2 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_green_doorwall_a_vis">
-        <pose>9.45 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>9.2 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_green_doorwall_b_col">
-        <pose>12.55 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>12.8 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_green_doorwall_b_vis">
-        <pose>12.55 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>12.8 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_green_backwall_col">
@@ -339,21 +339,21 @@
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_orange_doorwall_a_col">
-        <pose>16.45 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>16.2 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_orange_doorwall_a_vis">
-        <pose>16.45 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>16.2 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_orange_doorwall_b_col">
-        <pose>19.55 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>19.8 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_orange_doorwall_b_vis">
-        <pose>19.55 2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>19.8 2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_orange_backwall_col">
@@ -384,21 +384,21 @@
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_pink_doorwall_a_col">
-        <pose>16.45 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>16.2 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_pink_doorwall_a_vis">
-        <pose>16.45 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>16.2 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_pink_doorwall_b_col">
-        <pose>19.55 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>19.8 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
       </collision>
       <visual name="room_pink_doorwall_b_vis">
-        <pose>19.55 -2.0 1.25 0 0 0.0</pose>
-        <geometry><box><size>1.9 0.2 2.5</size></box></geometry>
+        <pose>19.8 -2.0 1.25 0 0 0.0</pose>
+        <geometry><box><size>1.4 0.2 2.5</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="room_pink_backwall_col">
@@ -462,48 +462,48 @@
       </visual></link>
       <link name="lintels">
       <collision name="lintel_blue_col">
-        <pose>11 2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
+        <pose>11 2.0 2.325 0 0 0</pose>
+        <geometry><box><size>2.2 0.2 0.35</size></box></geometry>
       </collision>
       <visual name="lintel_blue_vis">
-        <pose>11 2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
+        <pose>11 2.0 2.325 0 0 0</pose>
+        <geometry><box><size>2.2 0.2 0.35</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="lintel_green_col">
-        <pose>11 -2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
+        <pose>11 -2.0 2.325 0 0 0</pose>
+        <geometry><box><size>2.2 0.2 0.35</size></box></geometry>
       </collision>
       <visual name="lintel_green_vis">
-        <pose>11 -2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
+        <pose>11 -2.0 2.325 0 0 0</pose>
+        <geometry><box><size>2.2 0.2 0.35</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="lintel_orange_col">
-        <pose>18 2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
+        <pose>18 2.0 2.325 0 0 0</pose>
+        <geometry><box><size>2.2 0.2 0.35</size></box></geometry>
       </collision>
       <visual name="lintel_orange_vis">
-        <pose>18 2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
+        <pose>18 2.0 2.325 0 0 0</pose>
+        <geometry><box><size>2.2 0.2 0.35</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="lintel_pink_col">
-        <pose>18 -2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
+        <pose>18 -2.0 2.325 0 0 0</pose>
+        <geometry><box><size>2.2 0.2 0.35</size></box></geometry>
       </collision>
       <visual name="lintel_pink_vis">
-        <pose>18 -2.0 2.3 0 0 0</pose>
-        <geometry><box><size>1.2 0.2 0.4</size></box></geometry>
+        <pose>18 -2.0 2.325 0 0 0</pose>
+        <geometry><box><size>2.2 0.2 0.35</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       </link>
     </model>
 
-    <!-- ===== PORTA BLUE (giratoria, folha 1.08 azul; abre p/ dentro da sala) ===== -->
+    <!-- ===== PORTA BLUE (giratoria, folha 2.0 azul; abre p/ dentro da sala) ===== -->
     <model name='door_blue'>
       <link name='jamb_left'>
-        <pose>10.45 2.0 0 0 0 0</pose>
+        <pose>9.95 2.0 0 0 0 0</pose>
         <inertial>
           <mass>2.0</mass>
           <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
@@ -519,38 +519,39 @@
         </visual>
       </link>
       <link name='jamb_right'>
-        <pose>11.5 2.0 0 0 0 0</pose>
+        <pose>12.05 2.0 0 0 0 0</pose>
         <inertial>
           <mass>2.0</mass>
           <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
         </inertial>
         <collision name='col'>
-          <pose>0.05 0 1.25 0 0 0</pose>
+          <pose>0 0 1.25 0 0 0</pose>
           <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
         </collision>
         <visual name='vis'>
-          <pose>0.05 0 1.25 0 0 0</pose>
+          <pose>0 0 1.25 0 0 0</pose>
           <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
           <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
         </visual>
       </link>
       <link name='leaf'>
-        <pose>10.45 2.0 0 0 0 0</pose>
+        <pose>10.00 2.0 0 0 0 0</pose>
         <inertial>
+          <pose>1.0 0 1.08 0 0 0</pose>
           <mass>5.0</mass>
-          <inertia><ixx>2.02</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.56</iyy><iyz>0</iyz><izz>0.54</izz></inertia>
+          <inertia><ixx>1.840167</ixx><ixy>0</ixy><ixz>0</ixz><iyy>3.504167</iyy><iyz>0</iyz><izz>1.669333</izz></inertia>
         </inertial>
         <collision name='col'>
-          <pose>0.54 0 1.05 0 0 0</pose>
-          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
+          <pose>1.0 0 1.08 0 0 0</pose>
+          <geometry><box><size>2.0 0.08 2.1</size></box></geometry>
         </collision>
         <visual name='vis'>
-          <pose>0.54 0 1.05 0 0 0</pose>
-          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
+          <pose>1.0 0 1.08 0 0 0</pose>
+          <geometry><box><size>2.0 0.08 2.1</size></box></geometry>
           <material><ambient>0.1 0.45 1 1</ambient><diffuse>0.1 0.45 1 1</diffuse></material>
         </visual>
         <visual name='hinge_barrel'>
-          <pose>0 0 1.05 0 0 0</pose>
+          <pose>0 0 1.08 0 0 0</pose>
           <geometry><cylinder><radius>0.025</radius><length>2.1</length></cylinder></geometry>
           <material><ambient>0.1 0.45 1 1</ambient><diffuse>0.1 0.45 1 1</diffuse></material>
         </visual>
@@ -571,7 +572,7 @@
           <xyz>0 0 1</xyz>
           <limit>
             <lower>0</lower>
-            <upper>1.55</upper>
+            <upper>1.57079632679</upper>
             <effort>50</effort>
             <velocity>1.0</velocity>
           </limit>
@@ -580,14 +581,25 @@
       </joint>
       <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
         <joint_name>hinge_blue</joint_name>
+        <p_gain>30</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>28</d_gain>
+        <cmd_max>50</cmd_max>
+        <cmd_min>-50</cmd_min>
+      </plugin>
+
+      <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+        <joint_name>hinge_blue</joint_name>
+        <topic>/smartdoor/blue/joint_states</topic>
+        <update_rate>20</update_rate>
       </plugin>
     </model>
 
 
-    <!-- ===== PORTA GREEN (giratoria, folha 1.08 verde; abre p/ dentro da sala) ===== -->
+    <!-- ===== PORTA GREEN (giratoria, folha 2.0 verde; abre p/ dentro da sala) ===== -->
     <model name='door_green'>
       <link name='jamb_left'>
-        <pose>10.45 -2.0 0 0 0 0</pose>
+        <pose>9.95 -2.0 0 0 0 0</pose>
         <inertial>
           <mass>2.0</mass>
           <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
@@ -603,38 +615,39 @@
         </visual>
       </link>
       <link name='jamb_right'>
-        <pose>11.5 -2.0 0 0 0 0</pose>
+        <pose>12.05 -2.0 0 0 0 0</pose>
         <inertial>
           <mass>2.0</mass>
           <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
         </inertial>
         <collision name='col'>
-          <pose>0.05 0 1.25 0 0 0</pose>
+          <pose>0 0 1.25 0 0 0</pose>
           <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
         </collision>
         <visual name='vis'>
-          <pose>0.05 0 1.25 0 0 0</pose>
+          <pose>0 0 1.25 0 0 0</pose>
           <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
           <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
         </visual>
       </link>
       <link name='leaf'>
-        <pose>10.45 -2.0 0 0 0 0</pose>
+        <pose>10.00 -2.0 0 0 0 0</pose>
         <inertial>
+          <pose>1.0 0 1.08 0 0 0</pose>
           <mass>5.0</mass>
-          <inertia><ixx>2.02</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.56</iyy><iyz>0</iyz><izz>0.54</izz></inertia>
+          <inertia><ixx>1.840167</ixx><ixy>0</ixy><ixz>0</ixz><iyy>3.504167</iyy><iyz>0</iyz><izz>1.669333</izz></inertia>
         </inertial>
         <collision name='col'>
-          <pose>0.54 0 1.05 0 0 0</pose>
-          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
+          <pose>1.0 0 1.08 0 0 0</pose>
+          <geometry><box><size>2.0 0.08 2.1</size></box></geometry>
         </collision>
         <visual name='vis'>
-          <pose>0.54 0 1.05 0 0 0</pose>
-          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
+          <pose>1.0 0 1.08 0 0 0</pose>
+          <geometry><box><size>2.0 0.08 2.1</size></box></geometry>
           <material><ambient>0.1 0.75 0.3 1</ambient><diffuse>0.1 0.75 0.3 1</diffuse></material>
         </visual>
         <visual name='hinge_barrel'>
-          <pose>0 0 1.05 0 0 0</pose>
+          <pose>0 0 1.08 0 0 0</pose>
           <geometry><cylinder><radius>0.025</radius><length>2.1</length></cylinder></geometry>
           <material><ambient>0.1 0.75 0.3 1</ambient><diffuse>0.1 0.75 0.3 1</diffuse></material>
         </visual>
@@ -654,7 +667,7 @@
         <axis>
           <xyz>0 0 1</xyz>
           <limit>
-            <lower>-1.55</lower>
+            <lower>-1.57079632679</lower>
             <upper>0</upper>
             <effort>50</effort>
             <velocity>1.0</velocity>
@@ -664,14 +677,25 @@
       </joint>
       <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
         <joint_name>hinge_green</joint_name>
+        <p_gain>30</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>28</d_gain>
+        <cmd_max>50</cmd_max>
+        <cmd_min>-50</cmd_min>
+      </plugin>
+
+      <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+        <joint_name>hinge_green</joint_name>
+        <topic>/smartdoor/green/joint_states</topic>
+        <update_rate>20</update_rate>
       </plugin>
     </model>
 
 
-    <!-- ===== PORTA ORANGE (giratoria, folha 1.08 laranja; abre p/ dentro da sala) ===== -->
+    <!-- ===== PORTA ORANGE (giratoria, folha 2.0 laranja; abre p/ dentro da sala) ===== -->
     <model name='door_orange'>
       <link name='jamb_left'>
-        <pose>17.45 2.0 0 0 0 0</pose>
+        <pose>16.95 2.0 0 0 0 0</pose>
         <inertial>
           <mass>2.0</mass>
           <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
@@ -687,38 +711,39 @@
         </visual>
       </link>
       <link name='jamb_right'>
-        <pose>18.5 2.0 0 0 0 0</pose>
+        <pose>19.05 2.0 0 0 0 0</pose>
         <inertial>
           <mass>2.0</mass>
           <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
         </inertial>
         <collision name='col'>
-          <pose>0.05 0 1.25 0 0 0</pose>
+          <pose>0 0 1.25 0 0 0</pose>
           <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
         </collision>
         <visual name='vis'>
-          <pose>0.05 0 1.25 0 0 0</pose>
+          <pose>0 0 1.25 0 0 0</pose>
           <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
           <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
         </visual>
       </link>
       <link name='leaf'>
-        <pose>17.45 2.0 0 0 0 0</pose>
+        <pose>17.00 2.0 0 0 0 0</pose>
         <inertial>
+          <pose>1.0 0 1.08 0 0 0</pose>
           <mass>5.0</mass>
-          <inertia><ixx>2.02</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.56</iyy><iyz>0</iyz><izz>0.54</izz></inertia>
+          <inertia><ixx>1.840167</ixx><ixy>0</ixy><ixz>0</ixz><iyy>3.504167</iyy><iyz>0</iyz><izz>1.669333</izz></inertia>
         </inertial>
         <collision name='col'>
-          <pose>0.54 0 1.05 0 0 0</pose>
-          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
+          <pose>1.0 0 1.08 0 0 0</pose>
+          <geometry><box><size>2.0 0.08 2.1</size></box></geometry>
         </collision>
         <visual name='vis'>
-          <pose>0.54 0 1.05 0 0 0</pose>
-          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
+          <pose>1.0 0 1.08 0 0 0</pose>
+          <geometry><box><size>2.0 0.08 2.1</size></box></geometry>
           <material><ambient>1 0.55 0.1 1</ambient><diffuse>1 0.55 0.1 1</diffuse></material>
         </visual>
         <visual name='hinge_barrel'>
-          <pose>0 0 1.05 0 0 0</pose>
+          <pose>0 0 1.08 0 0 0</pose>
           <geometry><cylinder><radius>0.025</radius><length>2.1</length></cylinder></geometry>
           <material><ambient>1 0.55 0.1 1</ambient><diffuse>1 0.55 0.1 1</diffuse></material>
         </visual>
@@ -739,7 +764,7 @@
           <xyz>0 0 1</xyz>
           <limit>
             <lower>0</lower>
-            <upper>1.55</upper>
+            <upper>1.57079632679</upper>
             <effort>50</effort>
             <velocity>1.0</velocity>
           </limit>
@@ -748,14 +773,25 @@
       </joint>
       <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
         <joint_name>hinge_orange</joint_name>
+        <p_gain>30</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>28</d_gain>
+        <cmd_max>50</cmd_max>
+        <cmd_min>-50</cmd_min>
+      </plugin>
+
+      <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+        <joint_name>hinge_orange</joint_name>
+        <topic>/smartdoor/orange/joint_states</topic>
+        <update_rate>20</update_rate>
       </plugin>
     </model>
 
 
-    <!-- ===== PORTA PINK (giratoria, folha 1.08 rosa; abre p/ dentro da sala) ===== -->
+    <!-- ===== PORTA PINK (giratoria, folha 2.0 rosa; abre p/ dentro da sala) ===== -->
     <model name='door_pink'>
       <link name='jamb_left'>
-        <pose>17.45 -2.0 0 0 0 0</pose>
+        <pose>16.95 -2.0 0 0 0 0</pose>
         <inertial>
           <mass>2.0</mass>
           <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
@@ -771,38 +807,39 @@
         </visual>
       </link>
       <link name='jamb_right'>
-        <pose>18.5 -2.0 0 0 0 0</pose>
+        <pose>19.05 -2.0 0 0 0 0</pose>
         <inertial>
           <mass>2.0</mass>
           <inertia><ixx>1.05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.04</iyy><iyz>0</iyz><izz>0.011</izz></inertia>
         </inertial>
         <collision name='col'>
-          <pose>0.05 0 1.25 0 0 0</pose>
+          <pose>0 0 1.25 0 0 0</pose>
           <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
         </collision>
         <visual name='vis'>
-          <pose>0.05 0 1.25 0 0 0</pose>
+          <pose>0 0 1.25 0 0 0</pose>
           <geometry><box><size>0.1 0.24 2.5</size></box></geometry>
           <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
         </visual>
       </link>
       <link name='leaf'>
-        <pose>17.45 -2.0 0 0 0 0</pose>
+        <pose>17.00 -2.0 0 0 0 0</pose>
         <inertial>
+          <pose>1.0 0 1.08 0 0 0</pose>
           <mass>5.0</mass>
-          <inertia><ixx>2.02</ixx><ixy>0</ixy><ixz>0</ixz><iyy>2.56</iyy><iyz>0</iyz><izz>0.54</izz></inertia>
+          <inertia><ixx>1.840167</ixx><ixy>0</ixy><ixz>0</ixz><iyy>3.504167</iyy><iyz>0</iyz><izz>1.669333</izz></inertia>
         </inertial>
         <collision name='col'>
-          <pose>0.54 0 1.05 0 0 0</pose>
-          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
+          <pose>1.0 0 1.08 0 0 0</pose>
+          <geometry><box><size>2.0 0.08 2.1</size></box></geometry>
         </collision>
         <visual name='vis'>
-          <pose>0.54 0 1.05 0 0 0</pose>
-          <geometry><box><size>1.08 0.08 2.1</size></box></geometry>
+          <pose>1.0 0 1.08 0 0 0</pose>
+          <geometry><box><size>2.0 0.08 2.1</size></box></geometry>
           <material><ambient>1 0.15 0.55 1</ambient><diffuse>1 0.15 0.55 1</diffuse></material>
         </visual>
         <visual name='hinge_barrel'>
-          <pose>0 0 1.05 0 0 0</pose>
+          <pose>0 0 1.08 0 0 0</pose>
           <geometry><cylinder><radius>0.025</radius><length>2.1</length></cylinder></geometry>
           <material><ambient>1 0.15 0.55 1</ambient><diffuse>1 0.15 0.55 1</diffuse></material>
         </visual>
@@ -822,7 +859,7 @@
         <axis>
           <xyz>0 0 1</xyz>
           <limit>
-            <lower>-1.55</lower>
+            <lower>-1.57079632679</lower>
             <upper>0</upper>
             <effort>50</effort>
             <velocity>1.0</velocity>
@@ -832,6 +869,17 @@
       </joint>
       <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
         <joint_name>hinge_pink</joint_name>
+        <p_gain>30</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>28</d_gain>
+        <cmd_max>50</cmd_max>
+        <cmd_min>-50</cmd_min>
+      </plugin>
+
+      <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+        <joint_name>hinge_pink</joint_name>
+        <topic>/smartdoor/pink/joint_states</topic>
+        <update_rate>20</update_rate>
       </plugin>
     </model>
 

@@ -32,6 +32,7 @@ def generate_launch_description():
             # lifecycle_manager aborta e o 2D Goal Pose nunca anda).
             # Por isso cada tópico é reescrito pelo caminho completo.
             "odom_topic": ["/noblenara/", robot_codename, "/odom"],
+            "global_costmap.global_costmap.ros__parameters.static_layer.map_topic": ["/noblenara/", robot_codename, "/map_with_doors"],
             "global_costmap.global_costmap.ros__parameters.obstacle_layer.scan.topic": ["/noblenara/", robot_codename, "/scan_filtered"],
             "local_costmap.local_costmap.ros__parameters.obstacle_layer.scan.topic": ["/noblenara/", robot_codename, "/scan_filtered"],
             "collision_monitor.ros__parameters.scan.topic": ["/noblenara/", robot_codename, "/scan_filtered"],
@@ -61,6 +62,29 @@ def generate_launch_description():
         actions=[
             SetParameter('use_sim_time', True),
             PushROSNamespace(namespace=['/noblenara/', robot_codename]),
+
+            # Metas externas passam pela negociação de serviços antes do Nav2.
+            # Sem âncoras anunciadas, o encaminhamento funciona como Nav2 comum.
+            Node(
+                package='smartwheelchair',
+                executable='door_requester.py',
+                name='door_requester',
+                output='screen',
+                parameters=[{'robot_codename': robot_codename, 'use_sim_time': True}],
+            ),
+
+            # Merge door state into a copy of the base map before StaticLayer.
+            # An open door can then clear its old mark in the SLAM/saved map.
+            Node(
+                package='smartwheelchair',
+                executable='door_map_publisher.py',
+                name='door_map_publisher',
+                output='screen',
+                parameters=[{
+                    'robot_codename': robot_codename,
+                    'use_sim_time': True,
+                }],
+            ),
             
             # Publica o mapa salvo no tópico /map, para o AMCL e o costmap global
             Node(
@@ -100,6 +124,7 @@ def generate_launch_description():
                 executable='bt_navigator',
                 output='screen',
                 parameters=[configured_file],
+                remappings=[('goal_pose', 'navigation_goal')],
             ),
             
             Node(

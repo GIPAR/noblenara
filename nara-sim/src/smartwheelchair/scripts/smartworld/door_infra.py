@@ -1,136 +1,223 @@
 #!/usr/bin/env python3
-"""No da infra fixa (passo 3 da camada MQTT): finge ser o ESP32 da parede.
-
-Assina pedidos em nara/porta/+/request, publica o angulo na ponte
-ROS->GZ (/smartdoor/<sala>/cmd_pos) e confirma em nara/porta/<sala>/status.
-
-Alem disso, ao subir, ANUNCIA cada porta num topico RETIDO
-(nara/porta/<sala>/anuncio): nome, posicao e estado. Quem chegar depois
-(o robo) recebe o anuncio do broker sem precisar de lista hardcoded.
-
-Negociacao: o robo consulta antes de atravessar, publicando em
-nara/porta/<sala>/pedido {"acao": "PERGUNTA"}. A infra responde em
-nara/porta/<sala>/resposta {"pode": true/false, ...}. Hoje a infra sempre
-aceita (NAO_NEGAR=True); o "nao" fica como gancho para o futuro.
-"""
+"""Infraestrutura MQTT das portas, com confirmação pela junta real do Gazebo."""
 import json
+import math
 import time
+from queue import SimpleQueue
+from pathlib import Path
+
+import yaml
+from ament_index_python.packages import get_package_share_directory
 
 import paho.mqtt.client as mqtt
 import rclpy
 from rclpy.node import Node
+from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 
 BROKER = "localhost"
 PORT = 1883
-TRANSIT_TIME = 2.0  # provisório: sem leitura da junta ainda, estima o giro
-
-# Por enquanto a infra nunca nega uma passagem. Vire para False e
-# implemente a regra em pode_atender() para testar o caminho do "nao".
 NAO_NEGAR = True
 
-# Angulo da junta que abre cada porta
-OPEN = {"blue": 1.55, "green": -1.55, "orange": 1.55, "pink": -1.55}
 
-# Capacidades da infra: onde cada porta fica (x, y) no mundo.
-# E a infra que sabe isso (ela foi instalada ali), nao a cadeira.
-POSITION = {
-    "blue": (11.0, 2.0),
-    "green": (11.0, -2.0),
-    "orange": (18.0, 2.0),
-    "pink": (18.0, -2.0),
-}
+def load_services(path):
+    data = yaml.safe_load(Path(path).read_text()) or {}
+    services = data.get("services", {})
+    if not isinstance(services, dict):
+        raise ValueError("services deve ser um dicionário de identificadores")
+    required = ("x", "y", "width", "thickness", "open_angle", "closed_angle")
+    for name, service in services.items():
+        for field in required:
+            service[field] = float(service[field])
+            if not math.isfinite(service[field]):
+                raise ValueError(f"Valor não finito em {name}.{field}")
+        service["yaw"] = float(service.get("yaw", 0.0))
+        if service["width"] <= 0 or service["thickness"] <= 0:
+            raise ValueError(f"Dimensões inválidas em {name}")
+        for field in ("joint_name", "command_topic", "feedback_topic"):
+            if not isinstance(service.get(field), str) or not service[field]:
+                raise ValueError(f"Campo ausente em {name}.{field}")
+    return data.get("frame_id", "map"), services
 
 
 class DoorInfra(Node):
-    def __init__(self):
-        super().__init__("door_infra")
-        self.pubs = {
-            s: self.create_publisher(Float64, f"/smartdoor/{s}/cmd_pos", 10)
-            for s in OPEN
-        }
-        # Estado que cada porta anuncia (comeca fechada)
-        self.estado = {s: "FECHADA" for s in OPEN}
+    def __init__(self, **node_options):
+        super().__init__("door_infra", **node_options)
+        default_services = str(Path(get_package_share_directory("smartwheelchair")) / "config" / "smartworld_services.yaml")
+        self.declare_parameter("services_file", default_services)
+        self.frame_id, self.actuators = load_services(self.get_parameter("services_file").value)
+        self.declare_parameter("mapping_mode", False)
+        self.declare_parameter("angle_tolerance", 0.05)
+        self.declare_parameter("feedback_timeout", 2.0)
+        self.declare_parameter("command_retry", 1.0)
+        self.mapping_mode = self.get_parameter("mapping_mode").value
+        self.tolerance = float(self.get_parameter("angle_tolerance").value)
+        self.feedback_timeout = float(self.get_parameter("feedback_timeout").value)
+        self.command_retry = float(self.get_parameter("command_retry").value)
+        self.pending = SimpleQueue()
+        self.estado = {s: "DESCONHECIDA" for s in self.actuators}
+        self.desired = {s: "ABRIR" if self.mapping_mode else "FECHAR" for s in self.actuators}
+        self.feedback_at = {s: None for s in self.actuators}
+        self.command_at = {s: None for s in self.actuators}
+        self.last_announcement = None
+        self.last_tick = None
+        self.pubs = {s: self.create_publisher(Float64, d["command_topic"], 10)
+                     for s, d in self.actuators.items()}
+        self.feedback_subs = [
+            self.create_subscription(
+                JointState, d["feedback_topic"],
+                lambda msg, sala=s: self.on_joint(sala, msg), 10)
+            for s, d in self.actuators.items()
+        ]
+        self.create_timer(0.1, self.tick)
         self.mqtt = mqtt.Client()
         self.mqtt.on_connect = self.on_connect
         self.mqtt.on_message = self.on_message
-        self.mqtt.connect(BROKER, PORT, 60)
+        self.mqtt.reconnect_delay_set(min_delay=1, max_delay=10)
+        self.mqtt.connect_async(BROKER, PORT, 60)
         self.mqtt.loop_start()
-        self.get_logger().info(f"infra no ar, broker {BROKER}:{PORT}")
+        if self.mapping_mode:
+            self.get_logger().info("Modo mapeamento: todas as portas permanecerão abertas")
 
-    def anunciar(self, sala):
-        """Publica o anuncio RETIDO da porta: quem se inscrever depois recebe."""
-        x, y = POSITION[sala]
-        payload = json.dumps({
-            "sala": sala, "tipo": "porta", "x": x, "y": y,
-            "estado": self.estado[sala], "t": time.time(),
-        })
-        self.mqtt.publish(f"nara/porta/{sala}/anuncio", payload,
-                          qos=1, retain=True)
+    def now(self):
+        """Relógio monotônico de parede, imune a `use_sim_time` congelado.
+
+        O tempo de simulação só avança enquanto `/clock` é publicado. Antes de o
+        Gazebo subir (ou se a ponte do clock cair), `get_clock().now()` devolve
+        0.0 para sempre: os prazos de reenvio e de expiração do feedback nunca
+        venceriam e o estado ficaria preso em "DESCONHECIDA". Por isso a infra
+        usa o relógio de parede, que é monotônico e sempre avança.
+        """
+        return time.monotonic()
 
     def on_connect(self, client, userdata, flags, rc):
-        client.subscribe("nara/porta/+/request", qos=1)
-        client.subscribe("nara/porta/+/pedido", qos=1)
-        self.get_logger().info("assinando nara/porta/+/request e +/pedido")
-        # Anuncia todas as portas assim que o broker aceita a conexao
-        for sala in OPEN:
-            self.anunciar(sala)
-        self.get_logger().info(f"anunciadas {len(OPEN)} portas (retido)")
-
-    def pode_atender(self, sala):
-        """Politica de acesso da porta. Hoje so aceita; gancho p/ regras futuras.
-
-        Exemplos do que entraria aqui: porta ocupada por outra cadeira,
-        modo manutencao, horario, autorizacao por ala.
-        """
-        if NAO_NEGAR:
-            return True, "livre"
-        return False, "politica nao configurada"
+        for kind in ("request", "pedido"):
+            client.subscribe(f"nara/porta/+/{kind}", qos=1)
+        self.pending.put(None)
 
     def on_message(self, client, userdata, msg):
         try:
             data = json.loads(msg.payload.decode())
-        except ValueError:
-            self.get_logger().warn(f"pedido invalido em {msg.topic}")
+        except (ValueError, UnicodeError):
             return
-        sala = data.get("sala")
-        acao = data.get("acao")
-        if sala not in OPEN:
-            self.get_logger().warn(f"pedido ignorado: {msg.payload.decode()}")
-            return
-        if acao == "PERGUNTA":
-            self.responder_pergunta(sala, data)
-            return
-        if acao not in ("ABRIR", "FECHAR"):
-            self.get_logger().warn(f"pedido ignorado: {msg.payload.decode()}")
-            return
-        target = OPEN[sala] if acao == "ABRIR" else 0.0
-        self.pubs[sala].publish(Float64(data=target))
-        self.get_logger().info(f"sala {sala}: {acao} -> junta {target}")
-        time.sleep(TRANSIT_TIME)
-        estado = "ABERTA" if acao == "ABRIR" else "FECHADA"
-        self.estado[sala] = estado
-        # Anuncio retido reflete o novo estado para quem chegar depois
-        self.anunciar(sala)
-        status = json.dumps(
-            {"sala": sala, "estado": estado, "t": time.time(),
-             "pedido_t": data.get("t")}
-        )
-        self.mqtt.publish(f"nara/porta/{sala}/status", status, qos=1)
-        self.get_logger().info(f"sala {sala}: status {estado}")
+        if isinstance(data, dict):
+            self.pending.put(data)
 
-    def responder_pergunta(self, sala, data):
-        """Consulta da cadeira: 'posso passar por voce?'. Nao move a junta."""
-        pode, motivo = self.pode_atender(sala)
-        resposta = json.dumps({
-            "sala": sala, "pode": pode, "motivo": motivo,
-            "estado": self.estado[sala], "t": time.time(),
-            "pedido_t": data.get("t"),
-        })
-        self.mqtt.publish(f"nara/porta/{sala}/resposta", resposta, qos=1)
-        self.get_logger().info(
-            f"sala {sala}: consulta -> pode={pode} ({motivo})"
-        )
+    def feedback_fresh(self, sala, now):
+        """Feedback da junta recente o bastante para o estado ser confiável?"""
+        last = self.feedback_at[sala]
+        return last is not None and now - last <= self.feedback_timeout
+
+    def anunciar(self, sala):
+        service = self.actuators[sala]
+        geometry = {key: service[key] for key in ("x", "y", "yaw", "width", "thickness")}
+        now = self.now()
+        fresh = self.feedback_fresh(sala, now)
+        payload = {"sala": sala, "tipo": "porta", **geometry,
+                   "frame_id": self.frame_id, "capabilities": ["PERGUNTA", "ABRIR", "FECHAR"],
+                   "estado": self.estado[sala],
+                   # Explicita se `estado` veio de medição recente. Sem isso, um
+                   # "DESCONHECIDA" por ausência de feedback (ex.: ponte tardia ou
+                   # relógio parado) seria lido pelo robô como se a porta
+                   # estivesse fechada, bloqueando o goal.
+                   "feedback_fresh": fresh,
+                   "mapping_mode": self.mapping_mode, "t": now}
+        self.mqtt.publish(f"nara/porta/{sala}/anuncio", json.dumps(payload),
+                          qos=1, retain=True)
+
+    def set_state(self, sala, state):
+        # Não rebaixa um estado medido para DESCONHECIDA se a medição ainda é
+        # recente: evita que uma única janela sem feedback apague um "ABERTA" já
+        # confirmado, o que faria o robô desistir da travessia.
+        if state == "DESCONHECIDA" and self.feedback_fresh(sala, self.now()):
+            return
+        if self.estado[sala] == state:
+            return
+        self.estado[sala] = state
+        self.anunciar(sala)
+        self.mqtt.publish(f"nara/porta/{sala}/status",
+                          json.dumps({"sala": sala, "estado": state,
+                                      "feedback_fresh": state != "DESCONHECIDA",
+                                      "t": self.now()}),
+                          qos=1, retain=True)
+        self.get_logger().info(f"{sala}: estado medido {state}")
+
+    def on_joint(self, sala, msg):
+        for index, name in enumerate(msg.name):
+            if name.rsplit("::", 1)[-1] != self.actuators[sala]["joint_name"] or index >= len(msg.position):
+                continue
+            angle = msg.position[index]
+            if not math.isfinite(angle):
+                return
+            self.feedback_at[sala] = self.now()
+            if abs(angle - self.actuators[sala]["open_angle"]) <= self.tolerance:
+                state = "ABERTA"
+            elif abs(angle - self.actuators[sala]["closed_angle"]) <= self.tolerance:
+                state = "FECHADA"
+            else:
+                state = "ABRINDO" if self.desired[sala] == "ABRIR" else "FECHANDO"
+            self.set_state(sala, state)
+            return
+
+    def pode_atender(self, sala):
+        return (True, "mapeamento" if self.mapping_mode else "livre") if (
+            self.mapping_mode or NAO_NEGAR) else (False, "politica nao configurada")
+
+    def receive(self, data):
+        if data is None:
+            self.last_announcement = None
+            return
+        sala, action = data.get("sala"), data.get("acao")
+        if sala not in self.actuators:
+            return
+        if action == "PERGUNTA":
+            allowed, reason = self.pode_atender(sala)
+            payload = {"sala": sala, "pode": allowed, "motivo": reason,
+                       "estado": self.estado[sala], "t": self.now(),
+                       "pedido_t": data.get("t")}
+            self.mqtt.publish(f"nara/porta/{sala}/resposta", json.dumps(payload), qos=1)
+        elif action in ("ABRIR", "FECHAR"):
+            if self.mapping_mode:
+                action = "ABRIR"
+            if action == "ABRIR" and not self.pode_atender(sala)[0]:
+                return
+            if self.desired[sala] != action:
+                self.desired[sala] = action
+                self.command_at[sala] = None
+                self.get_logger().info(f"{sala}: alvo {action}")
+
+    def tick(self):
+        while not self.pending.empty():
+            self.receive(self.pending.get())
+        now = self.now()
+        if self.last_tick is not None and now < self.last_tick:
+            for sala in self.actuators:
+                self.command_at[sala] = self.feedback_at[sala] = None
+            self.last_announcement = None
+        self.last_tick = now
+        for sala in self.actuators:
+            last = self.feedback_at[sala]
+            if last is None or now - last > self.feedback_timeout:
+                self.set_state(sala, "DESCONHECIDA")
+            # Reenvia o alvo: recupera ponte tardia, comando perdido e reset da junta.
+            last = self.command_at[sala]
+            if last is None or now - last >= self.command_retry:
+                target = self.actuators[sala]["open_angle"] if self.desired[sala] == "ABRIR" else self.actuators[sala]["closed_angle"]
+                self.pubs[sala].publish(Float64(data=target))
+                self.command_at[sala] = now
+        first_announce = self.last_announcement is None
+        if first_announce or now - self.last_announcement >= 2.0:
+            for sala in self.actuators:
+                self.anunciar(sala)
+                if first_announce:
+                    state = self.estado[sala]
+                    self.mqtt.publish(
+                        f"nara/porta/{sala}/status",
+                        json.dumps({"sala": sala, "estado": state,
+                                    "feedback_fresh": self.feedback_fresh(sala, now),
+                                    "t": now}),
+                        qos=1, retain=True)
+            self.last_announcement = now
 
 
 def main():
@@ -140,9 +227,14 @@ def main():
         rclpy.spin(node)
     except KeyboardInterrupt:
         pass
-    node.mqtt.loop_stop()
-    node.destroy_node()
-    rclpy.shutdown()
+    finally:
+        for sala in node.actuators:
+            for kind in ("anuncio", "status"):
+                node.mqtt.publish(f"nara/porta/{sala}/{kind}", "", qos=1, retain=True)
+        node.mqtt.loop_stop()
+        node.mqtt.disconnect()
+        node.destroy_node()
+        rclpy.try_shutdown()
 
 
 if __name__ == "__main__":

@@ -1,0 +1,48 @@
+# Descrição da infraestrutura deste ambiente. A cadeira aprende estes dados
+# pelos anúncios MQTT; nenhum nome ou limite de sala é necessário no robô.
+frame_id: map
+services:
+  blue:
+    x: 11.0
+    y: 2.0
+    yaw: 0.0
+    width: 2.0
+    thickness: 0.3
+    joint_name: hinge_blue
+    command_topic: /smartdoor/blue/cmd_pos
+    feedback_topic: /smartdoor/blue/joint_states
+    open_angle: 1.57079632679
+    closed_angle: 0.0
+  green:
+    x: 11.0
+    y: -2.0
+    yaw: 0.0
+    width: 2.0
+    thickness: 0.3
+    joint_name: hinge_green
+    command_topic: /smartdoor/green/cmd_pos
+    feedback_topic: /smartdoor/green/joint_states
+    open_angle: -1.57079632679
+    closed_angle: 0.0
+  orange:
+    x: 18.0
+    y: 2.0
+    yaw: 0.0
+    width: 2.0
+    thickness: 0.3
+    joint_name: hinge_orange
+    command_topic: /smartdoor/orange/cmd_pos
+    feedback_topic: /smartdoor/orange/joint_states
+    open_angle: 1.57079632679
+    closed_angle: 0.0
+  pink:
+    x: 18.0
+    y: -2.0
+    yaw: 0.0
+    width: 2.0
+    thickness: 0.3
+    joint_name: hinge_pink
+    command_topic: /smartdoor/pink/cmd_pos
+    feedback_topic: /smartdoor/pink/joint_states
+    open_angle: -1.57079632679
+    closed_angle: 0.0

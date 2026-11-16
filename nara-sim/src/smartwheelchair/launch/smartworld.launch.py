@@ -2,7 +2,7 @@
 """SmartWorld: mundo + camada V2I/MQTT das portas num launch so.
 
 Sobe Gazebo (server+GUI), ponte do /clock, ponte ROS->GZ das juntas e os
-nos door_requester (cadeira) e door_infra (parede). O Mosquitto e a cadeira
+no door_infra (parede). O solicitante móvel sobe com o Nav2. O Mosquitto e a cadeira
 (noblenara.launch.py) continuam por fora: broker e robo sobem a parte.
 """
 
@@ -11,6 +11,7 @@ from launch.actions import ExecuteProcess, DeclareLaunchArgument, SetEnvironment
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     # Get package share directory
@@ -32,6 +33,20 @@ def generate_launch_description():
         'robot_codename',
         default_value='alfa',
         description='Codename do robo (namespace da odometria)'
+    )
+    mapping_mode_arg = DeclareLaunchArgument(
+        'mapping_mode', default_value='false',
+        description='Manter todas as portas abertas durante o mapeamento SLAM'
+    )
+    services_file_arg = DeclareLaunchArgument(
+        'services_file',
+        default_value=PathJoinSubstitution([pkg_share, 'config', 'smartworld_services.yaml']),
+        description='Descrição dos serviços e atuadores deste ambiente'
+    )
+    bridge_file_arg = DeclareLaunchArgument(
+        'bridge_file',
+        default_value=PathJoinSubstitution([pkg_share, 'config', 'smartdoor_bridge.yaml']),
+        description='Pontes ROS/Gazebo dos atuadores deste ambiente'
     )
 
     # Get the world file path
@@ -68,17 +83,9 @@ def generate_launch_description():
         executable='bridge_node',
         name='smartdoor_bridge',
         parameters=[{
-            'config_file': PathJoinSubstitution([pkg_share, 'config', 'smartdoor_bridge.yaml']),
+            'config_file': LaunchConfiguration('bridge_file'),
             'use_sim_time': True,
         }],
-        output='screen',
-    )
-
-    requester = Node(
-        package='smartwheelchair',
-        executable='door_requester.py',
-        name='door_requester',
-        parameters=[{'robot_codename': robot_codename, 'use_sim_time': True}],
         output='screen',
     )
 
@@ -86,19 +93,24 @@ def generate_launch_description():
         package='smartwheelchair',
         executable='door_infra.py',
         name='door_infra',
-        parameters=[{'use_sim_time': True}],
+        parameters=[{'use_sim_time': True, 'services_file': LaunchConfiguration('services_file'),
+                     'mapping_mode': ParameterValue(
+            LaunchConfiguration('mapping_mode'), value_type=bool)}],
         output='screen',
     )
 
     smart_delayed = TimerAction(
         period=3.0,
-        actions=[joint_bridge, requester, infra],
+        actions=[joint_bridge, infra],
     )
 
     return LaunchDescription([
         gazebo_resource_path,
         world_file_arg,
         robot_codename_arg,
+        mapping_mode_arg,
+        services_file_arg,
+        bridge_file_arg,
         gazebo_server,
         gazebo_client,
         global_bridge,

@@ -295,7 +295,9 @@ def aplicar_config(config: dict):
                 f.write(novo_launch)
 
     # ============ NAV2 (params) ============
-    base_nav2 = _ler_base("config/nav2_params.yaml")
+    # Preserve navigation topology and tuning added after the original backup.
+    # Only the performance values explicitly selected below are rewritten.
+    base_nav2 = (CONFIG_DIR / "nav2_params.yaml").read_text()
     nav2 = _ajustar_nav2(base_nav2,
                          amcl_particles=config.get("amcl_particles"),
                          mppi_batch=config.get("mppi_batch"),

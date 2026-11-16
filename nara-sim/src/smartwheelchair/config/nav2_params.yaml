@@ -69,6 +69,8 @@ global_costmap:
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: true
+        # Rewritten per robot by nav2_launch.py; supplied by door_map_publisher.
+        map_topic: map_with_doors
 
       obstacle_layer: # Provavelmente trocar por voxel layer quando adicionar Câmera
         plugin: "nav2_costmap_2d::ObstacleLayer"
@@ -109,7 +111,7 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 2.0
+        inflation_radius: 1.0
 
 local_costmap:
   local_costmap:
@@ -172,7 +174,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 2.0
+        inflation_radius: 1.0
 
 
 # Planejador global, retorna um caminho de acordo com o global_costmap
@@ -187,7 +189,8 @@ planner_server:
       allow_unknown: false
       max_iterations: 500000
       smooth_path: true
-      motion_model_for_search: "DUBIN"
+      motion_model_for_search: "REEDS_SHEPP" # Permite manobras para frente e de ré
+      lookup_table_size: 5.0 # Cache heurístico menor para reduzir o tempo de inicialização
 
 
 # Planejador local
@@ -223,7 +226,7 @@ controller_server:
       model_dt: 0.05
       batch_size: 800
       vx_max: 1.0
-      vx_min: 0.0
+      vx_min: -0.3 # Executa os trechos de ré produzidos pelo planejador
       wz_max: 0.8
       motion_model: "DiffDrive"
 
